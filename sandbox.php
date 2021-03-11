@@ -46,32 +46,6 @@ final class Sandbox {
 
     protected bool $active = false;
 
-    protected array $post_metas = [
-        'ct_builder_shortcodes',
-        'ct_other_template',
-        'ct_page_settings',
-        'ct_parent_template',
-        'ct_render_post_using',
-        'ct_use_inner_content',
-    ];
-
-    protected array $options = [
-        'ct_components_classes',
-        'ct_custom_selectors',
-        'ct_global_settings',
-        'ct_style_folders',
-        'ct_style_sets',
-        'ct_style_sheets',
-        'ct_svg_sets',
-        'oxygen_vsb_comments_list_templates',
-        'oxygen_vsb_easy_posts_templates',
-        'oxygen_vsb_element_presets',
-        'oxygen_vsb_global_colors',
-        'oxygen_vsb_google_fonts_cache',
-        'oxygen_vsb_latest_typekit_fonts',
-        'oxygen_vsb_universal_css_cache',
-    ];
-
     protected $secret;
 
 	public function __construct() {
@@ -177,16 +151,11 @@ final class Sandbox {
         wp_enqueue_style( "{$this->module_id}-admin" );
 
         foreach ( array_keys( wp_load_alloptions() ) as $option ) {
-            if ( strpos( $option, "oxygen_vsb_" ) === 0 ) {
+            if ( strpos( $option, 'oxygen_vsb_' ) === 0 || strpos( $option, 'ct_' ) === 0 ) {
                 add_filter( "pre_option_{$option}", [ $this, 'pre_get_option' ], 0, 3 );
                 add_filter( "pre_update_option_{$option}", [ $this, 'pre_update_option' ], 0, 3 );
             }
         }
-
-        // foreach ( $this->options as $option ) {
-        //     add_filter( "pre_option_{$option}", [ $this, 'pre_get_option' ], 0, 3 );
-        //     add_filter( "pre_update_option_{$option}", [ $this, 'pre_update_option' ], 0, 3 );
-        // }
 
         add_filter( 'get_post_metadata', [ $this, 'get_post_metadata' ], 0, 4 );
         add_filter( 'update_post_metadata', [ $this, 'update_post_metadata' ], 0, 5 );
@@ -199,7 +168,7 @@ final class Sandbox {
         if ( $option === 'oxygen_vsb_universal_css_cache' ) {
             return 'false';
         }
-        
+
         if ( DB::has( 'options', [ 'option_name' => "{$this->module_id}_{$option}", ] ) ) {
             $pre_option = get_option( "{$this->module_id}_{$option}", $default );
         }
@@ -217,19 +186,19 @@ final class Sandbox {
     }
 
     public function update_post_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
-        return in_array( $meta_key, $this->post_metas ) 
+        return strpos( $meta_key, 'ct_' ) === 0 
             ? update_metadata( 'post', $object_id, "{$this->module_id}_{$meta_key}", $meta_value, $prev_value ) 
             : $check;
     }
 
     public function delete_post_metadata( $delete, $object_id, $meta_key, $meta_value, $delete_all ) {
-        return in_array( $meta_key, $this->post_metas )
+        return strpos( $meta_key, 'ct_' ) === 0 
             ? delete_metadata( 'post', $object_id, "{$this->module_id}_{$meta_key}", $meta_value, $delete_all )
             : $delete;
     }
 
     public function get_post_metadata( $value, $object_id, $meta_key, $single ) {
-        if ( in_array( $meta_key, $this->post_metas ) && metadata_exists( 'post', $object_id, "{$this->module_id}_{$meta_key}" ) ) {
+        if ( strpos( $meta_key, 'ct_' ) === 0 && metadata_exists( 'post', $object_id, "{$this->module_id}_{$meta_key}" ) ) {
             $value = get_metadata( 'post', $object_id, "{$this->module_id}_{$meta_key}", $single );
             if ( $single && is_array( $value ) ) {
                 $value = [$value];
