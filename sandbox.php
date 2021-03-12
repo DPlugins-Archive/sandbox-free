@@ -1,9 +1,9 @@
 <?php
 /**
- * Sandbox
+ * Oxyrealm Sandbox
  *
  * @wordpress-plugin
- * Plugin Name:         Sandbox
+ * Plugin Name:         Oxyrealm Sandbox
  * Description:         Sandbox for Oxygen Builder.
  * Version:             0.0.1
  * Author:              oxyrealm
@@ -96,7 +96,15 @@ final class Sandbox {
     private function validate_cookie(): bool {
         $cookie = $_COOKIE[ $this->module_id ] ?? false;
 
-        return $cookie && $cookie === $this->secret;
+        if ( $cookie ) {
+            if ( $cookie === $this->secret ) {
+                return true;
+            }
+
+            $this->unset_cookie();
+        }
+
+        return false;
     }
 
     private function set_cookie(): void {
@@ -233,6 +241,11 @@ final class Sandbox {
 
         $this->publish_sandbox_options();
         $this->publish_sandbox_postmeta();
+        $this->set_secret();
+
+        if ( wp_redirect( admin_url( 'admin.php?page=oxygen_vsb_settings&tab=cache&start_cache_generation=true' ) ) ) {
+            exit;
+        } 
     }
 
     public function publish_sandbox_options(): void {
@@ -279,7 +292,71 @@ final class Sandbox {
     }
 
     public function publish_sandbox_postmeta(): void {
+        $postmetas = DB::select( 'postmeta', [
+            'meta_id',
+            'post_id',
+            'meta_key',
+            'meta_value',
+        ], [
+            'meta_key[~]' => "{$this->module_id}_%"
+        ] );
 
+        if ( $postmetas ) {
+            foreach ( $postmetas as $postmeta ) {
+                $postmeta  = (object) $postmeta;
+                $_postmeta_key  = $this->ltrim( $postmeta->meta_key, "{$this->module_id}_" );
+
+                $exist_postmeta = DB::get( 'postmeta', 'meta_id', [
+                    'meta_key' => $_postmeta_key,
+                ] );
+
+                if ( $exist_postmeta ) {
+                    $backup = DB::get( 'postmeta', 'meta_id', [ 'meta_key' => "aetherbackup_{$_postmeta_key}", ] );
+
+                    if ( $backup ) {
+                        DB::delete( 'postmeta', [
+                            'meta_id' => $backup,
+                        ] );
+                    }
+
+                    DB::update( 'postmeta', [
+                        'meta_key' => "aetherbackup_{$_postmeta_key}",
+                    ], [
+                        'meta_id' => $exist_postmeta,
+                    ] );
+                }
+
+                DB::update( 'postmeta', [
+                    'meta_key' => "{$this->module_id}_{$_postmeta_key}",
+                ], [
+                    'meta_id' => $postmeta->meta_id,
+                ] );
+            }
+        }
+    }
+
+    public function delete_changes(): void {
+        wp_verify_nonce( $this->module_id );
+
+        $this->delete_sandbox_options();
+        $this->delete_sandbox_postmeta();
+        $this->set_secret();
+
+        if ( wp_redirect( admin_url( 'admin.php?page=oxygen_vsb_settings&tab=cache&start_cache_generation=true' ) ) ) {
+            exit;
+        } 
+    }
+
+    public function delete_sandbox_options(): void {
+        $options = DB::delete( 'options', [
+            'option_name[~]' => "{$this->module_id}_%"
+        ] );
+    }
+
+    public function delete_sandbox_postmeta(): void {
+        $postmetas = DB::delete( 'postmeta', [
+            'meta_key[~]' => "{$this->module_id}_%"
+        ] );
     }
 
 }
