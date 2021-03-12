@@ -48,40 +48,40 @@ final class Sandbox {
 
     protected $secret;
 
-	public function __construct() {
-		register_activation_hook( OXYREALM_SANDBOX_FILE, [ $this, 'plugin_activate' ] );
-		register_deactivation_hook( OXYREALM_SANDBOX_FILE, [ $this, 'plugin_deactivate' ] );
+    public function __construct() {
+        register_activation_hook( OXYREALM_SANDBOX_FILE, [ $this, 'plugin_activate' ] );
+        register_deactivation_hook( OXYREALM_SANDBOX_FILE, [ $this, 'plugin_deactivate' ] );
 
-		add_action( 'plugins_loaded', [ $this, 'init_plugin' ] );
-	}
+        add_action( 'plugins_loaded', [ $this, 'init_plugin' ] );
+    }
 
     public function plugin_activate(): void {
-		if ( ! get_option( 'oxyrealm_sandbox_installed' ) ) {
-			update_option( 'oxyrealm_sandbox_installed', time() );
-		}
+        if ( ! get_option( 'oxyrealm_sandbox_installed' ) ) {
+            update_option( 'oxyrealm_sandbox_installed', time() );
+        }
 
-		$installed_db_version = get_option( 'oxyrealm_sandbox_db_version' );
-        
-		if ( ! $installed_db_version || intval( $installed_db_version ) !== intval( OXYREALM_SANDBOX_DB_VERSION ) ) {
-			Migration::migrate( OXYREALM_SANDBOX_MIGRATION_PATH, "\\Oxyrealm\\Modules\\Sandbox\\Database\\Migrations\\", $installed_db_version ?: 0, OXYREALM_SANDBOX_DB_VERSION );
-			update_option( 'oxyrealm_sandbox_db_version', OXYREALM_SANDBOX_DB_VERSION );
-		}
+        $installed_db_version = get_option( 'oxyrealm_sandbox_db_version' );
 
-		update_option( 'oxyrealm_sandbox_version', OXYREALM_SANDBOX_VERSION );
+        if ( ! $installed_db_version || intval( $installed_db_version ) !== intval( OXYREALM_SANDBOX_DB_VERSION ) ) {
+            Migration::migrate( OXYREALM_SANDBOX_MIGRATION_PATH, "\\Oxyrealm\\Modules\\Sandbox\\Database\\Migrations\\", $installed_db_version ?: 0, OXYREALM_SANDBOX_DB_VERSION );
+            update_option( 'oxyrealm_sandbox_db_version', OXYREALM_SANDBOX_DB_VERSION );
+        }
+
+        update_option( 'oxyrealm_sandbox_version', OXYREALM_SANDBOX_VERSION );
 
         $this->set_secret();
-	}
+    }
 
-	public function plugin_deactivate(): void {
+    public function plugin_deactivate(): void {
         $this->unset_secret();
-	}
+    }
 
     private function is_active(): bool {
         if ( current_user_can( 'manage_options' ) || $this->validate_cookie() ) {
             return true;
         }
 
-        $secret = $_GET[$this->module_id] ?? false;
+        $secret = $_GET[ $this->module_id ] ?? false;
         if ( $secret ) {
             if ( $secret === $this->secret ) {
                 $this->set_cookie();
@@ -89,26 +89,27 @@ final class Sandbox {
                 $this->unset_cookie();
             }
         }
-        
+
         return false;
     }
 
     private function validate_cookie(): bool {
-        $cookie = $_COOKIE[$this->module_id] ?? false;
+        $cookie = $_COOKIE[ $this->module_id ] ?? false;
+
         return $cookie && $cookie === $this->secret;
     }
 
     private function set_cookie(): void {
-        setcookie($this->module_id, $this->secret, time() + DAY_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN);
-        
+        setcookie( $this->module_id, $this->secret, time() + DAY_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
+
         if ( isset( $_SERVER['REQUEST_URI'] ) && wp_redirect( $_SERVER['REQUEST_URI'] ) ) {
             exit;
         }
     }
 
     private function unset_cookie(): void {
-        setcookie($this->module_id, null, -1, COOKIEPATH, COOKIE_DOMAIN);
-        
+        setcookie( $this->module_id, null, - 1, COOKIEPATH, COOKIE_DOMAIN );
+
         if ( isset( $_SERVER['REQUEST_URI'] ) && wp_redirect( $_SERVER['REQUEST_URI'] ) ) {
             exit;
         }
@@ -125,25 +126,25 @@ final class Sandbox {
     public static function run() {
         static $instance = false;
 
-		if ( ! $instance ) {
-			$instance = new Sandbox();
-		}
+        if ( ! $instance ) {
+            $instance = new Sandbox();
+        }
 
-		return $instance;
+        return $instance;
     }
 
     public function init_plugin() {
-        Assets::register_style("{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/css/admin.css');
+        Assets::register_style( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/css/admin.css' );
 
         $this->secret = get_option( "{$this->module_id}_secret" );
         $this->active = $this->is_active();
 
-		add_action( 'init', [ $this, 'boot' ] );
+        add_action( 'init', [ $this, 'boot' ] );
     }
 
     public function boot() {
         Assets::do_register();
-        
+
         if ( ! $this->active ) {
             return;
         }
@@ -182,17 +183,18 @@ final class Sandbox {
         }
 
         update_option( "{$this->module_id}_{$option}", $value );
+
         return $old_value;
     }
 
     public function update_post_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
-        return strpos( $meta_key, 'ct_' ) === 0 
-            ? update_metadata( 'post', $object_id, "{$this->module_id}_{$meta_key}", $meta_value, $prev_value ) 
+        return strpos( $meta_key, 'ct_' ) === 0
+            ? update_metadata( 'post', $object_id, "{$this->module_id}_{$meta_key}", $meta_value, $prev_value )
             : $check;
     }
 
     public function delete_post_metadata( $delete, $object_id, $meta_key, $meta_value, $delete_all ) {
-        return strpos( $meta_key, 'ct_' ) === 0 
+        return strpos( $meta_key, 'ct_' ) === 0
             ? delete_metadata( 'post', $object_id, "{$this->module_id}_{$meta_key}", $meta_value, $delete_all )
             : $delete;
     }
@@ -201,20 +203,21 @@ final class Sandbox {
         if ( strpos( $meta_key, 'ct_' ) === 0 && metadata_exists( 'post', $object_id, "{$this->module_id}_{$meta_key}" ) ) {
             $value = get_metadata( 'post', $object_id, "{$this->module_id}_{$meta_key}", $single );
             if ( $single && is_array( $value ) ) {
-                $value = [$value];
+                $value = [ $value ];
             }
         }
+
         return $value;
     }
 
     public function admin_bar_node( WP_Admin_Bar $wp_admin_bar ) {
-        $wp_admin_bar->add_node([
+        $wp_admin_bar->add_node( [
             'id'    => 'sandbox',
             'title' => 'Sandbox <span class="text-green-400">●</span>',
-            'meta' => [
+            'meta'  => [
                 'title' => 'Sandbox Mode - Aether'
             ]
-        ]);
+        ] );
     }
 
 }
@@ -222,7 +225,7 @@ final class Sandbox {
 if ( class_exists( '\Aether' ) ) {
     Sandbox::run();
 } else {
-    add_action( 'admin_notices', function() {
+    add_action( 'admin_notices', function () {
         echo sprintf(
             '<div class="notice notice-%s is-dismissible"><p><b>Sandbox</b>: %s</p></div>',
             'error',
