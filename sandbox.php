@@ -221,4 +221,10 @@ final class Sandbox {
 
 if ( class_exists( '\Aether' ) ) {
     $aether->container['modules']['sandbox'] = Sandbox::run();
+} else {
+    echo sprintf(
+        '<div class="notice notice-%s is-dismissible"><p><b>Sandbox</b>: %s</p></div>',
+        'error',
+        '<a href="https://aether.oxyrealm.com/downloads/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by Oxyrealm), but it could not be installed automatically. Please install and activate the Aether plugin first.'
+    );
 }
