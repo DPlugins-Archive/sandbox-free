@@ -245,7 +245,7 @@ final class Sandbox {
 
         if ( wp_redirect( admin_url( 'admin.php?page=oxygen_vsb_settings&tab=cache&start_cache_generation=true' ) ) ) {
             exit;
-        } 
+        }
     }
 
     public function publish_sandbox_options(): void {
@@ -259,8 +259,8 @@ final class Sandbox {
 
         if ( $options ) {
             foreach ( $options as $option ) {
-                $option  = (object) $option;
-                $_option_name  = $this->ltrim( $option->option_name, "{$this->module_id}_" );
+                $option       = (object) $option;
+                $_option_name = $this->ltrim( $option->option_name, "{$this->module_id}_" );
 
                 $exist_option = DB::get( 'options', 'option_id', [
                     'option_name' => $_option_name
@@ -303,8 +303,8 @@ final class Sandbox {
 
         if ( $postmetas ) {
             foreach ( $postmetas as $postmeta ) {
-                $postmeta  = (object) $postmeta;
-                $_postmeta_key  = $this->ltrim( $postmeta->meta_key, "{$this->module_id}_" );
+                $postmeta      = (object) $postmeta;
+                $_postmeta_key = $this->ltrim( $postmeta->meta_key, "{$this->module_id}_" );
 
                 $exist_postmeta = DB::get( 'postmeta', 'meta_id', [
                     'meta_key' => $_postmeta_key,
@@ -344,7 +344,7 @@ final class Sandbox {
 
         if ( wp_redirect( admin_url( 'admin.php?page=oxygen_vsb_settings&tab=cache&start_cache_generation=true' ) ) ) {
             exit;
-        } 
+        }
     }
 
     public function delete_sandbox_options(): void {
