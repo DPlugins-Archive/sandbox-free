@@ -49,8 +49,8 @@ final class Sandbox {
     protected $secret;
 
 	public function __construct() {
-		register_activation_hook( AETHER_FILE, [ $this, 'plugin_activate' ] );
-		register_deactivation_hook( AETHER_FILE, [ $this, 'plugin_deactivate' ] );
+		register_activation_hook( OXYREALM_SANDBOX_FILE, [ $this, 'plugin_activate' ] );
+		register_deactivation_hook( OXYREALM_SANDBOX_FILE, [ $this, 'plugin_deactivate' ] );
 
 		add_action( 'plugins_loaded', [ $this, 'init_plugin' ] );
 	}
@@ -133,7 +133,7 @@ final class Sandbox {
     }
 
     public function init_plugin() {
-        Assets::register_style("{$this->module_id}-admin", AETHER_URL . '/modules/sandbox/assets/css/admin.css');
+        Assets::register_style("{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/css/admin.css');
 
         $this->secret = get_option( "{$this->module_id}_secret" );
         $this->active = $this->is_active();
@@ -220,11 +220,13 @@ final class Sandbox {
 }
 
 if ( class_exists( '\Aether' ) ) {
-    $aether->container['modules']['sandbox'] = Sandbox::run();
+    Sandbox::run();
 } else {
-    echo sprintf(
-        '<div class="notice notice-%s is-dismissible"><p><b>Sandbox</b>: %s</p></div>',
-        'error',
-        '<a href="https://aether.oxyrealm.com/downloads/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by Oxyrealm), but it could not be installed automatically. Please install and activate the Aether plugin first.'
-    );
+    add_action( 'admin_notices', function() {
+        echo sprintf(
+            '<div class="notice notice-%s is-dismissible"><p><b>Sandbox</b>: %s</p></div>',
+            'error',
+            '<a href="https://aether.oxyrealm.com/downloads/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by Oxyrealm), but it could not be installed automatically. Please install and activate the Aether plugin first.'
+        );
+    } );
 }
