@@ -163,6 +163,8 @@ final class Sandbox {
         add_filter( 'delete_post_metadata', [ $this, 'delete_post_metadata' ], 0, 5 );
 
         add_action( 'admin_bar_menu', [ $this, 'admin_bar_node' ], 100 );
+        add_action( "admin_post_{$this->module_id}_publish", [ $this, 'publish_changes' ] );
+        add_action( "admin_post_{$this->module_id}_delete", [ $this, 'delete_changes' ] );
     }
 
     public function pre_get_option( $pre_option, string $option, $default ) {
@@ -218,6 +220,66 @@ final class Sandbox {
                 'title' => 'Sandbox Mode - Aether'
             ]
         ] );
+    }
+
+    private function ltrim( string $string, string $prefix ): string {
+        return strpos( $string, $prefix ) === 0
+            ? substr( $string, strlen( $prefix ) )
+            : $string;
+    }
+
+    public function publish_changes(): void {
+        wp_verify_nonce( $this->module_id );
+
+        $this->publish_sandbox_options();
+        $this->publish_sandbox_postmeta();
+    }
+
+    public function publish_sandbox_options(): void {
+        $options = DB::select( 'options', [
+            'option_id',
+            'option_name',
+            'option_value',
+        ], [
+            'option_name[~]' => "{$this->module_id}_%"
+        ] );
+
+        if ( $options ) {
+            foreach ( $options as $option ) {
+                $option  = (object) $option;
+                $_option_name  = $this->ltrim( $option->option_name, "{$this->module_id}_" );
+
+                $exist_option = DB::get( 'options', 'option_id', [
+                    'option_name' => $_option_name
+                ] );
+
+                if ( $exist_option ) {
+                    $backup = DB::get( 'options', 'option_id', [ 'option_name' => "aetherbackup_{$_option_name}", ] );
+
+                    if ( $backup ) {
+                        DB::delete( 'options', [
+                            'option_id' => $backup,
+                        ] );
+                    }
+
+                    DB::update( 'options', [
+                        'option_name' => "aetherbackup_{$_option_name}",
+                    ], [
+                        'option_id' => $exist_option,
+                    ] );
+                }
+
+                DB::update( 'options', [
+                    'option_name' => "{$this->module_id}_{$_option_name}",
+                ], [
+                    'option_id' => $option->option_id,
+                ] );
+            }
+        }
+    }
+
+    public function publish_sandbox_postmeta(): void {
+
     }
 
 }
