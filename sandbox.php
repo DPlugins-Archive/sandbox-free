@@ -124,11 +124,11 @@ final class Sandbox {
     }
 
     public function set_secret(): void {
-        update_option( "{$this->module_id}_secret", wp_generate_uuid4() );
+        update_option( "oxyrealm_sandbox_secret", wp_generate_uuid4() );
     }
 
     public function unset_secret(): void {
-        delete_option( "{$this->module_id}_secret" );
+        delete_option( "oxyrealm_sandbox_secret" );
     }
 
     public static function run() {
@@ -143,8 +143,9 @@ final class Sandbox {
 
     public function init_plugin() {
         Assets::register_style( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/css/admin.css' );
-
-        $this->secret = get_option( "{$this->module_id}_secret" );
+        Assets::register_script( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/js/admin.js' );
+        
+        $this->secret = get_option( "oxyrealm_sandbox_secret" );
         $this->active = $this->is_active();
 
         add_action( 'init', [ $this, 'boot' ] );
@@ -158,6 +159,7 @@ final class Sandbox {
         }
 
         wp_enqueue_style( "{$this->module_id}-admin" );
+        wp_enqueue_script( "{$this->module_id}-admin" );
 
         foreach ( array_keys( wp_load_alloptions() ) as $option ) {
             if ( strpos( $option, 'oxygen_vsb_' ) === 0 || strpos( $option, 'ct_' ) === 0 ) {
@@ -171,8 +173,15 @@ final class Sandbox {
         add_filter( 'delete_post_metadata', [ $this, 'delete_post_metadata' ], 0, 5 );
 
         add_action( 'admin_bar_menu', [ $this, 'admin_bar_node' ], 100 );
-        add_action( "admin_post_{$this->module_id}_publish", [ $this, 'publish_changes' ] );
-        add_action( "admin_post_{$this->module_id}_delete", [ $this, 'delete_changes' ] );
+        // add_action( "admin_post_{$this->module_id}_publish", [ $this, 'publish_changes' ] );
+        // add_action( "admin_post_{$this->module_id}_delete", [ $this, 'delete_changes' ] );
+        add_action( 'admin_notices', [ $this, 'admin_notice_module_action' ] );
+
+        if( isset( $_REQUEST[ "{$this->module_id}_publish" ] ) && wp_verify_nonce( $_REQUEST[ "{$this->module_id}_publish" ], $this->module_id ) ) {
+            $this->publish_changes();
+        } elseif ( isset( $_REQUEST[ "{$this->module_id}_delete" ] ) && wp_verify_nonce( $_REQUEST[ "{$this->module_id}_delete" ], $this->module_id ) ) {
+            $this->delete_changes();
+        }
     }
 
     public function pre_get_option( $pre_option, string $option, $default ) {
@@ -222,12 +231,21 @@ final class Sandbox {
 
     public function admin_bar_node( WP_Admin_Bar $wp_admin_bar ) {
         $wp_admin_bar->add_node( [
-            'id'    => 'sandbox',
+            'id'    => 'oxyrealm-sandbox',
             'title' => 'Sandbox <span class="text-green-400">●</span>',
             'meta'  => [
                 'title' => 'Sandbox Mode - Aether'
             ]
         ] );
+    }
+
+    public function admin_notice_module_action(): void {
+        echo sprintf(
+            '<div class="notice notice-info"><p><strong> Sandbox Mode is Active	</strong><br>Any change you made to Oxygen Builder\'s settings, post, page, and template will isolated until you published it.</p><p><div><strong>Preview link</strong>: <input type="text" style="width:60%%" onclick="this.select();" readonly value="%s"></div><br><div><a id="sandbox-publish-changes" href="%s" class="button button-primary"> Publish </a> <a id="sandbox-delete-changes" href="%s" class="button button-secondary"> Delete </a></div></p></div>',
+            add_query_arg( $this->module_id, $this->secret, site_url() ),
+            add_query_arg( [ "{$this->module_id}_publish" => wp_create_nonce( $this->module_id ), ], admin_url() ),
+            add_query_arg( [ "{$this->module_id}_delete" => wp_create_nonce( $this->module_id ), ], admin_url() )
+        );
     }
 
     private function ltrim( string $string, string $prefix ): string {
@@ -237,11 +255,10 @@ final class Sandbox {
     }
 
     public function publish_changes(): void {
-        wp_verify_nonce( $this->module_id );
-
         $this->publish_sandbox_options();
         $this->publish_sandbox_postmeta();
         $this->set_secret();
+        $this->deactivate_module();
 
         if ( wp_redirect( admin_url( 'admin.php?page=oxygen_vsb_settings&tab=cache&start_cache_generation=true' ) ) ) {
             exit;
@@ -336,11 +353,10 @@ final class Sandbox {
     }
 
     public function delete_changes(): void {
-        wp_verify_nonce( $this->module_id );
-
         $this->delete_sandbox_options();
         $this->delete_sandbox_postmeta();
         $this->set_secret();
+        $this->deactivate_module();
 
         if ( wp_redirect( admin_url( 'admin.php?page=oxygen_vsb_settings&tab=cache&start_cache_generation=true' ) ) ) {
             exit;
@@ -357,6 +373,14 @@ final class Sandbox {
         $postmetas = DB::delete( 'postmeta', [
             'meta_key[~]' => "{$this->module_id}_%"
         ] );
+    }
+
+    public function deactivate_module(): void {
+        if ( ! function_exists( 'deactivate_plugins' ) ) {
+            require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+        }
+
+        deactivate_plugins( plugin_basename( OXYREALM_SANDBOX_FILE ) );
     }
 
 }
