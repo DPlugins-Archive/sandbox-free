@@ -5,28 +5,28 @@
  * @wordpress-plugin
  * Plugin Name:         Oxyrealm Sandbox
  * Description:         Sandbox for Oxygen Builder.
- * Version:             0.0.1
+ * Version:             1.0.0
  * Author:              oxyrealm
- * Author URI:          https://oxyrealm.com
+ * Author URI:          https://aether.oxyrealm.com
  * Requires at least:   5.6
  * Tested up to:        5.7
  * Requires PHP:        7.4
- * Text Domain:         sandbox
+ * Text Domain:         oxyrealm-sandbox
  * Domain Path:         /languages
  *
  * @package             Sandbox
  * @author              oxyrealm <hello@oxyrealm.com>
- * @link                https://oxyrealm.com
- * @since               0.0.1
+ * @link                https://aether.oxyrealm.com
+ * @since               1.0.0
  * @copyright           2021 oxyrealm
- * @version             0.0.1
+ * @version             1.0.0
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '0.0.1' );
+define( 'OXYREALM_SANDBOX_VERSION', '1.0.0' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
 
 define( 'OXYREALM_SANDBOX_FILE', __FILE__ );
@@ -144,7 +144,7 @@ final class Sandbox {
     public function init_plugin() {
         Assets::register_style( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/css/admin.css' );
         Assets::register_script( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/js/admin.js' );
-        
+
         $this->secret = get_option( "oxyrealm_sandbox_secret" );
         $this->active = $this->is_active();
 
@@ -173,13 +173,11 @@ final class Sandbox {
         add_filter( 'delete_post_metadata', [ $this, 'delete_post_metadata' ], 0, 5 );
 
         add_action( 'admin_bar_menu', [ $this, 'admin_bar_node' ], 100 );
-        // add_action( "admin_post_{$this->module_id}_publish", [ $this, 'publish_changes' ] );
-        // add_action( "admin_post_{$this->module_id}_delete", [ $this, 'delete_changes' ] );
         add_action( 'admin_notices', [ $this, 'admin_notice_module_action' ] );
 
-        if( isset( $_REQUEST[ "{$this->module_id}_publish" ] ) && wp_verify_nonce( $_REQUEST[ "{$this->module_id}_publish" ], $this->module_id ) ) {
+        if ( isset( $_REQUEST["{$this->module_id}_publish"] ) && wp_verify_nonce( $_REQUEST["{$this->module_id}_publish"], $this->module_id ) ) {
             $this->publish_changes();
-        } elseif ( isset( $_REQUEST[ "{$this->module_id}_delete" ] ) && wp_verify_nonce( $_REQUEST[ "{$this->module_id}_delete" ], $this->module_id ) ) {
+        } elseif ( isset( $_REQUEST["{$this->module_id}_delete"] ) && wp_verify_nonce( $_REQUEST["{$this->module_id}_delete"], $this->module_id ) ) {
             $this->delete_changes();
         }
     }
