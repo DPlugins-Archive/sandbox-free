@@ -7,7 +7,7 @@
  * Description:         Sandbox for Oxygen Builder.
  * Version:             1.0.0
  * Author:              oxyrealm
- * Author URI:          https://aether.oxyrealm.com
+ * Author URI:          https://oxyrealm.com
  * Requires at least:   5.6
  * Tested up to:        5.7
  * Requires PHP:        7.4
@@ -16,7 +16,7 @@
  *
  * @package             Sandbox
  * @author              oxyrealm <hello@oxyrealm.com>
- * @link                https://aether.oxyrealm.com
+ * @link                https://oxyrealm.com
  * @since               1.0.0
  * @copyright           2021 oxyrealm
  * @version             1.0.0
@@ -390,7 +390,7 @@ if ( class_exists( '\Aether' ) ) {
         echo sprintf(
             '<div class="notice notice-%s is-dismissible"><p><b>Sandbox</b>: %s</p></div>',
             'error',
-            '<a href="https://aether.oxyrealm.com/downloads/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by Oxyrealm), but it could not be installed automatically. Please install and activate the Aether plugin first.'
+            '<a href="https://oxyrealm.com/downloads/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by Oxyrealm), but it could not be installed automatically. Please install and activate the Aether plugin first.'
         );
     } );
 }

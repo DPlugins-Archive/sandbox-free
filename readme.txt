@@ -1,6 +1,6 @@
 === Oxyrealm Sandbox ===
 Contributors: oxyrealm
-Donate link: https://aether.oxyrealm.com/donate?utm_source=aether
+Donate link: https://oxyrealm.com/donate?utm_source=aether
 Tags: oxygen builder
 Requires at least: 5.6
 Tested up to: 5.7
@@ -24,17 +24,17 @@ Any change you made to Oxygen Builder's settings (plugin setting and global styl
 
 For more info about the fifth element for Oxygen Builder, check out the following:
 
-* The [Oxyrealm Sandbox](https://aether.oxyrealm.com/sandbox?utm_source=oxyrealm-sandbox) official homepage.
+* The [Oxyrealm Sandbox](https://oxyrealm.com/sandbox?utm_source=oxyrealm-sandbox) official homepage.
 
 
 == Installation ==
 
-Please [read documentation](https://aether.oxyrealm.com/documentation?utm_source=oxyrealm-sandbox) on Oxyrealm Sandbox website for instruction how to install Aether plugin. 
+Please [read documentation](https://oxyrealm.com/documentation?utm_source=oxyrealm-sandbox) on Oxyrealm Sandbox website for instruction how to install Aether plugin. 
 
 
 == Changelog ==
 
-For more information, see [Releases](https://aether.oxyrealm.com/changelog?utm_source=oxyrealm-sandbox).
+For more information, see [Releases](https://oxyrealm.com/changelog?utm_source=oxyrealm-sandbox).
 
 = 1.0.0 =
 
