@@ -69,11 +69,11 @@ final class Sandbox {
 
         update_option( 'oxyrealm_sandbox_version', OXYREALM_SANDBOX_VERSION );
 
-        $this->set_secret();
+        self::set_secret();
     }
 
     public function plugin_deactivate(): void {
-        $this->unset_secret();
+        self::unset_secret();
     }
 
     private function is_active(): bool {
@@ -123,12 +123,12 @@ final class Sandbox {
         }
     }
 
-    public function set_secret(): void {
-        update_option( "oxyrealm_sandbox_secret", wp_generate_uuid4() );
+    public static function set_secret(): void {
+        update_option( 'oxyrealm_sandbox_secret', wp_generate_uuid4() );
     }
 
-    public function unset_secret(): void {
-        delete_option( "oxyrealm_sandbox_secret" );
+    public static function unset_secret(): void {
+        delete_option( 'oxyrealm_sandbox_secret' );
     }
 
     public static function run() {
@@ -145,7 +145,7 @@ final class Sandbox {
         Assets::register_style( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/css/admin.css' );
         Assets::register_script( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/js/admin.js' );
 
-        $this->secret = get_option( "oxyrealm_sandbox_secret" );
+        $this->secret = get_option( 'oxyrealm_sandbox_secret' );
         $this->active = $this->is_active();
 
         add_action( 'init', [ $this, 'boot' ] );
@@ -255,7 +255,7 @@ final class Sandbox {
     public function publish_changes(): void {
         $this->publish_sandbox_options();
         $this->publish_sandbox_postmeta();
-        $this->set_secret();
+        self::set_secret();
         $this->deactivate_module();
 
         if ( wp_redirect( admin_url( 'admin.php?page=oxygen_vsb_settings&tab=cache&start_cache_generation=true' ) ) ) {
@@ -353,7 +353,7 @@ final class Sandbox {
     public function delete_changes(): void {
         $this->delete_sandbox_options();
         $this->delete_sandbox_postmeta();
-        $this->set_secret();
+        self::set_secret();
         $this->deactivate_module();
 
         if ( wp_redirect( admin_url( 'admin.php?page=oxygen_vsb_settings&tab=cache&start_cache_generation=true' ) ) ) {
@@ -390,7 +390,11 @@ if ( class_exists( '\Aether' ) ) {
         echo sprintf(
             '<div class="notice notice-%s is-dismissible"><p><b>Sandbox</b>: %s</p></div>',
             'error',
-            '<a href="https://oxyrealm.com/downloads/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by Oxyrealm), but it could not be installed automatically. Please install and activate the Aether plugin first.'
+            '<a href="https://oxyrealm.com/downloads/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by OxyRealm), but it could not be installed automatically. Please install and activate the Aether plugin first.'
         );
     } );
+
+    if ( get_option( 'oxyrealm_sandbox_secret' ) === false ) {
+        Sandbox::set_secret();
+    }
 }
