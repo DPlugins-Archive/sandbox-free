@@ -5,7 +5,7 @@
  * @wordpress-plugin
  * Plugin Name:         Oxyrealm Sandbox
  * Description:         Sandbox for Oxygen Builder.
- * Version:             1.0.0
+ * Version:             1.0.1
  * Author:              oxyrealm
  * Author URI:          https://oxyrealm.com
  * Requires at least:   5.6
@@ -19,14 +19,14 @@
  * @link                https://oxyrealm.com
  * @since               1.0.0
  * @copyright           2021 oxyrealm
- * @version             1.0.0
+ * @version             1.0.1
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '1.0.0' );
+define( 'OXYREALM_SANDBOX_VERSION', '1.0.1' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
 
 define( 'OXYREALM_SANDBOX_FILE', __FILE__ );

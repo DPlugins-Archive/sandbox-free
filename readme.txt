@@ -4,7 +4,7 @@ Donate link: https://oxyrealm.com/donate?utm_source=aether
 Tags: oxygen builder
 Requires at least: 5.6
 Tested up to: 5.7
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -18,7 +18,7 @@ The sandbox for Oxygen Builder development.
 
 Oxyrealm Sandbox is an isolated environment for Oxygen Builder plugin.
 
-Any change you made to Oxygen Builder's settings (plugin setting and global style), post (block, page, and template) will isolated until you published it.
+Any change you made to Oxygen Builder's settings (plugin setting and global style), post (all oxygen releated metapost) will isolated until you published it.
 
 ### Further Reading
 
@@ -35,6 +35,12 @@ Please [read documentation](https://oxyrealm.com/documentation?utm_source=oxyrea
 == Changelog ==
 
 For more information, see [Releases](https://oxyrealm.com/changelog?utm_source=oxyrealm-sandbox).
+
+= 1.0.1 =
+
+Release Date: March 22th, 2021
+
+* Fixed: The secret token not generated when Aether plugin is not activated 
 
 = 1.0.0 =
 
