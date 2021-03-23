@@ -38,7 +38,7 @@ For more information, see [Releases](https://oxyrealm.com/changelog?utm_source=o
 
 = 1.0.1 =
 
-Release Date: March 22th, 2021
+Release Date: March 23th, 2021
 
 * Fixed: The secret token not generated when Aether plugin is not activated 
 

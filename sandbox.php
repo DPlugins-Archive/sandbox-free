@@ -81,7 +81,7 @@ final class Sandbox {
             return true;
         }
 
-        $secret = $_GET[ $this->module_id ] ?? false;
+        $secret = isset( $_GET[ $this->module_id ] ) ? sanitize_text_field( $_GET[ $this->module_id ] ) : false;
         if ( $secret ) {
             if ( $secret === $this->secret ) {
                 $this->set_cookie();
@@ -94,7 +94,7 @@ final class Sandbox {
     }
 
     private function validate_cookie(): bool {
-        $cookie = $_COOKIE[ $this->module_id ] ?? false;
+        $cookie = isset ( $_COOKIE[ $this->module_id ] ) ? sanitize_text_field( $_COOKIE[ $this->module_id ] ) : false;
 
         if ( $cookie ) {
             if ( $cookie === $this->secret ) {
