@@ -5,7 +5,7 @@
  * @wordpress-plugin
  * Plugin Name:         Oxyrealm Sandbox
  * Description:         Sandbox for Oxygen Builder.
- * Version:             1.0.2
+ * Version:             1.0.3
  * Author:              oxyrealm
  * Author URI:          https://oxyrealm.com
  * Requires at least:   5.6
@@ -19,14 +19,14 @@
  * @link                https://oxyrealm.com
  * @since               1.0.0
  * @copyright           2021 oxyrealm
- * @version             1.0.2
+ * @version             1.0.3
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '1.0.2' );
+define( 'OXYREALM_SANDBOX_VERSION', '1.0.3' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
 
 define( 'OXYREALM_SANDBOX_FILE', __FILE__ );
@@ -48,6 +48,8 @@ final class Sandbox {
 
     protected $secret;
 
+    private $notices = [];
+
 	/**
 	 * Slug for the Aether plugin.
 	 *
@@ -56,33 +58,9 @@ final class Sandbox {
 	private $aether_plugin_path = 'aether/aether.php';
 
     public function __construct() {
-        if ( ! $this->is_aether_installed() ) {
-            if ( ! $this->install_aether() ) {
-                add_action( 'admin_notices', function () {
-                    echo sprintf(
-                        '<div class="notice notice-%s is-dismissible"><p><b>Sandbox</b>: %s</p></div>',
-                        'error',
-                        '<a href="https://wordpress.org/plugins/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by OxyRealm), but it could not be installed automatically. Please install and activate the Aether plugin first.'
-                    );
-                } );
-                $this->deactivate_module();
-                return;
-            }
-
-			if ( ! $this->is_aether_activated() ) {
-				if ( ! $this->activate_aether() ) {
-                    add_action( 'admin_notices', function () {
-                        echo sprintf(
-                            '<div class="notice notice-%s is-dismissible"><p><b>Sandbox</b>: %s</p></div>',
-                            'error',
-                            '<a href="https://wordpress.org/plugins/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by OxyRealm), but it could not be activated automatically. Please install and activate the Aether plugin first.'
-                        );
-                    } );
-                    $this->deactivate_module();
-                    return;
-				}
-			}
-        }
+        if ( ! $this->are_requirements_met() ) {
+			return;
+		}
 
         register_activation_hook( OXYREALM_SANDBOX_FILE, [ $this, 'plugin_activate' ] );
         register_deactivation_hook( OXYREALM_SANDBOX_FILE, [ $this, 'plugin_deactivate' ] );
@@ -460,6 +438,103 @@ final class Sandbox {
 	 */
 	public function activate_aether() {
 		return activate_plugin( $this->aether_plugin_path );
+	}
+
+    private function are_requirements_met() {
+        if ( $this->is_aether_being_deactivated() ) {
+            $this->notices[] = [
+                'level' => 'error',
+                'message' => '<a href="https://wordpress.org/plugins/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by OxyRealm), Both plugins are now disabled.'
+            ];
+        } elseif ( $this->is_aether_being_updated() ) {
+            return false;
+        } else {
+            if ( ! $this->is_aether_installed() ) {
+                if ( ! $this->install_aether() ) {
+                    $this->notices[] = [
+                        'level' => 'error',
+                        'message' => '<a href="https://wordpress.org/plugins/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by OxyRealm), but it could not be installed automatically. Please install and activate the Aether plugin first.'
+                    ];
+                }
+            }
+
+            if ( ! $this->is_aether_activated() ) {
+                if ( ! $this->activate_aether() ) {
+                    $this->notices[] = [
+                        'level' => 'error',
+                        'message' => '<a href="https://wordpress.org/plugins/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by OxyRealm), but it could not be activated automatically. Please install and activate the Aether plugin first.'
+                    ];
+                }
+            }
+        }
+
+		if ( empty( $this->notices ) ) {
+			return true;
+		}
+
+		add_action( 'admin_notices', [ $this, 'admin_notices' ] );
+        $this->deactivate_module();
+        return false;
+
+    }
+
+    public function admin_notices() {
+        foreach ($this->notices as $notice) {
+            echo sprintf(
+                '<div class="notice notice-%s is-dismissible"><p><b>Sandbox</b>: %s</p></div>',
+                $notice['level'],
+                $notice['message']
+            );
+        }
+	}
+
+    public function is_aether_being_deactivated() {
+		if ( ! is_admin() ) {
+			return false;
+		}
+
+		$action = isset( $_REQUEST['action'] ) && $_REQUEST['action'] != -1 ? $_REQUEST['action'] : '';
+		if ( ! $action ) {
+			$action = isset( $_REQUEST['action2'] ) && $_REQUEST['action2'] != -1 ? $_REQUEST['action2'] : '';
+		}
+		$plugin  = isset( $_REQUEST['plugin'] ) ? $_REQUEST['plugin'] : '';
+		$checked = isset( $_POST['checked'] ) && is_array( $_POST['checked'] ) ? $_POST['checked'] : [];
+
+		$deactivate          = 'deactivate';
+		$deactivate_selected = 'deactivate-selected';
+		$actions             = [ $deactivate, $deactivate_selected ];
+
+		if ( ! in_array( $action, $actions, true ) ) {
+			return false;
+		}
+
+		if ( $action === $deactivate && $plugin !== $this->aether_plugin_path ) {
+			return false;
+		}
+
+		if ( $action === $deactivate_selected && ! in_array( $this->aether_plugin_path, $checked, true ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+    public function is_aether_being_updated() {
+		$action = isset( $_POST['action'] ) && $_POST['action'] != -1 ? $_POST['action'] : '';
+		$plugins = isset( $_POST['plugin'] ) ? (array) $_POST['plugin'] : [];
+		if ( empty( $plugins ) ) {
+			$plugins = isset( $_POST['plugins'] ) ? (array) $_POST['plugins'] : [];
+		}
+
+		$update_plugin   = 'update-plugin';
+		$update_selected = 'update-selected';
+		$actions         = [ $update_plugin, $update_selected ];
+
+		if ( ! in_array( $action, $actions, true ) ) {
+			return false;
+		}
+
+		return in_array( $this->aether_plugin_path, $plugins, true );
 	}
 
 }
