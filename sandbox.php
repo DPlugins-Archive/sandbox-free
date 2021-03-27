@@ -48,7 +48,42 @@ final class Sandbox {
 
     protected $secret;
 
+	/**
+	 * Slug for the Aether plugin.
+	 *
+	 * @var string
+	 */
+	private $aether_plugin_path = 'aether/aether.php';
+
     public function __construct() {
+        if ( ! $this->is_aether_installed() ) {
+            if ( ! $this->install_aether() ) {
+                add_action( 'admin_notices', function () {
+                    echo sprintf(
+                        '<div class="notice notice-%s is-dismissible"><p><b>Sandbox</b>: %s</p></div>',
+                        'error',
+                        '<a href="https://wordpress.org/plugins/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by OxyRealm), but it could not be installed automatically. Please install and activate the Aether plugin first.'
+                    );
+                } );
+                $this->deactivate_module();
+                return;
+            }
+
+			if ( ! $this->is_aether_activated() ) {
+				if ( ! $this->activate_aether() ) {
+                    add_action( 'admin_notices', function () {
+                        echo sprintf(
+                            '<div class="notice notice-%s is-dismissible"><p><b>Sandbox</b>: %s</p></div>',
+                            'error',
+                            '<a href="https://wordpress.org/plugins/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by OxyRealm), but it could not be activated automatically. Please install and activate the Aether plugin first.'
+                        );
+                    } );
+                    $this->deactivate_module();
+                    return;
+				}
+			}
+        }
+
         register_activation_hook( OXYREALM_SANDBOX_FILE, [ $this, 'plugin_activate' ] );
         register_deactivation_hook( OXYREALM_SANDBOX_FILE, [ $this, 'plugin_deactivate' ] );
 
@@ -381,20 +416,52 @@ final class Sandbox {
         deactivate_plugins( plugin_basename( OXYREALM_SANDBOX_FILE ) );
     }
 
-}
+	public function is_aether_activated() {
+		$active_plugins = get_option( 'active_plugins', [] );
+		return in_array( $this->aether_plugin_path, $active_plugins, true );
+	}
 
-if ( class_exists( '\Aether' ) ) {
-    Sandbox::run();
-} else {
-    add_action( 'admin_notices', function () {
-        echo sprintf(
-            '<div class="notice notice-%s is-dismissible"><p><b>Sandbox</b>: %s</p></div>',
-            'error',
-            '<a href="https://oxyrealm.com/downloads/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by OxyRealm), but it could not be installed automatically. Please install and activate the Aether plugin first.'
-        );
-    } );
+    public function is_aether_installed() {
+        if ( $this->is_aether_activated() ) {
+			return true;
+		}
 
-    if ( get_option( 'oxyrealm_sandbox_secret' ) === false ) {
-        Sandbox::set_secret();
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		$installed_plugins = get_plugins();
+
+		return array_key_exists( $this->aether_plugin_path, $installed_plugins );
     }
+
+	/**
+	 * Install Aether plugin from the wordpress.org repository.
+	 *
+	 * @return bool Whether install was successful.
+	 */
+	public function install_aether() {
+		include_once ABSPATH . 'wp-includes/pluggable.php';
+		include_once ABSPATH . 'wp-admin/includes/misc.php';
+		include_once ABSPATH . 'wp-admin/includes/file.php';
+		include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+		include_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+		$skin        = new \Automatic_Upgrader_Skin();
+		$upgrader    = new \Plugin_Upgrader( $skin );
+		$plugin_file = 'https://downloads.wordpress.org/plugin/aether.latest-stable.zip';
+		$result      = $upgrader->install( $plugin_file );
+
+		return $result;
+	}
+
+	/**
+	 * Activate Aether plugin.
+	 *
+	 * @return bool Whether activation was successful or not.
+	 */
+	public function activate_aether() {
+		return activate_plugin( $this->aether_plugin_path );
+	}
+
 }
+
+Sandbox::run();
