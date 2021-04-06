@@ -1,13 +1,13 @@
 <?php
 /**
- * Oxyrealm Sandbox
+ * dPlugins Sandbox - Isolated Environment for Oxygen Builder
  *
  * @wordpress-plugin
- * Plugin Name:         Oxyrealm Sandbox
- * Description:         Sandbox for Oxygen Builder.
- * Version:             1.0.3
- * Author:              oxyrealm
- * Author URI:          https://oxyrealm.com
+ * Plugin Name:         dPlugins Sandbox
+ * Description:         Sandbox is an isolated environment for Oxygen Builder plugin.
+ * Version:             1.0.4
+ * Author:              dPlugins
+ * Author URI:          https://dplugins.com
  * Requires at least:   5.6
  * Tested up to:        5.7
  * Requires PHP:        7.4
@@ -15,18 +15,18 @@
  * Domain Path:         /languages
  *
  * @package             Sandbox
- * @author              oxyrealm <hello@oxyrealm.com>
- * @link                https://oxyrealm.com
+ * @author              dPlugins <mailme@markokrstic.com>
+ * @link                https://dplugins.com
  * @since               1.0.0
- * @copyright           2021 oxyrealm
- * @version             1.0.3
+ * @copyright           2021 dplugins.com
+ * @version             1.0.4
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '1.0.3' );
+define( 'OXYREALM_SANDBOX_VERSION', '1.0.4' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
 
 define( 'OXYREALM_SANDBOX_FILE', __FILE__ );
@@ -48,14 +48,14 @@ final class Sandbox {
 
     protected $secret;
 
-    private $notices = [];
+    protected $notices = [];
 
 	/**
 	 * Slug for the Aether plugin.
 	 *
 	 * @var string
 	 */
-	private $aether_plugin_path = 'aether/aether.php';
+	protected $aether_plugin_path = 'aether/aether.php';
 
     public function __construct() {
         if ( ! $this->are_requirements_met() ) {
@@ -68,25 +68,60 @@ final class Sandbox {
         add_action( 'plugins_loaded', [ $this, 'init_plugin' ] );
     }
 
-    public function plugin_activate(): void {
-        if ( ! get_option( 'oxyrealm_sandbox_installed' ) ) {
-            update_option( 'oxyrealm_sandbox_installed', time() );
+    public static function run() {
+        static $instance = false;
+
+        if ( ! $instance ) {
+            $instance = new Sandbox();
         }
 
-        $installed_db_version = get_option( 'oxyrealm_sandbox_db_version' );
-
-        if ( ! $installed_db_version || intval( $installed_db_version ) !== intval( OXYREALM_SANDBOX_DB_VERSION ) ) {
-            Migration::migrate( OXYREALM_SANDBOX_MIGRATION_PATH, "\\Oxyrealm\\Modules\\Sandbox\\Database\\Migrations\\", $installed_db_version ?: 0, OXYREALM_SANDBOX_DB_VERSION );
-            update_option( 'oxyrealm_sandbox_db_version', OXYREALM_SANDBOX_DB_VERSION );
-        }
-
-        update_option( 'oxyrealm_sandbox_version', OXYREALM_SANDBOX_VERSION );
-
-        self::set_secret();
+        return $instance;
     }
 
-    public function plugin_deactivate(): void {
-        self::unset_secret();
+    public function init_plugin() {
+        Assets::register_style( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/css/admin.css' );
+        Assets::register_script( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/js/admin.js' );
+
+        $this->secret = get_option( 'oxyrealm_sandbox_secret', false );
+
+        if ( $this->secret === false ) {
+            $this->secret = self::set_secret();
+        }
+
+        $this->active = $this->is_active();
+
+        add_action( 'init', [ $this, 'boot' ] );
+    }
+
+    public function boot() {
+        Assets::do_register();
+
+        if ( ! $this->active ) {
+            return;
+        }
+
+        wp_enqueue_style( "{$this->module_id}-admin" );
+        wp_enqueue_script( "{$this->module_id}-admin" );
+
+        foreach ( array_keys( wp_load_alloptions() ) as $option ) {
+            if ( strpos( $option, 'oxygen_vsb_' ) === 0 || strpos( $option, 'ct_' ) === 0 ) {
+                add_filter( "pre_option_{$option}", [ $this, 'pre_get_option' ], 0, 3 );
+                add_filter( "pre_update_option_{$option}", [ $this, 'pre_update_option' ], 0, 3 );
+            }
+        }
+
+        add_filter( 'get_post_metadata', [ $this, 'get_post_metadata' ], 0, 4 );
+        add_filter( 'update_post_metadata', [ $this, 'update_post_metadata' ], 0, 5 );
+        add_filter( 'delete_post_metadata', [ $this, 'delete_post_metadata' ], 0, 5 );
+
+        add_action( 'admin_bar_menu', [ $this, 'admin_bar_node' ], 100 );
+        add_action( 'admin_notices', [ $this, 'admin_notice_module_action' ] );
+
+        if ( isset( $_REQUEST["{$this->module_id}_publish"] ) && wp_verify_nonce( $_REQUEST["{$this->module_id}_publish"], $this->module_id ) ) {
+            $this->publish_changes();
+        } elseif ( isset( $_REQUEST["{$this->module_id}_delete"] ) && wp_verify_nonce( $_REQUEST["{$this->module_id}_delete"], $this->module_id ) ) {
+            $this->delete_changes();
+        }
     }
 
     private function is_active(): bool {
@@ -136,63 +171,14 @@ final class Sandbox {
         }
     }
 
-    public static function set_secret(): void {
+    public static function set_secret() {
         update_option( 'oxyrealm_sandbox_secret', wp_generate_uuid4() );
+
+        return get_option( 'oxyrealm_sandbox_secret' );
     }
 
     public static function unset_secret(): void {
         delete_option( 'oxyrealm_sandbox_secret' );
-    }
-
-    public static function run() {
-        static $instance = false;
-
-        if ( ! $instance ) {
-            $instance = new Sandbox();
-        }
-
-        return $instance;
-    }
-
-    public function init_plugin() {
-        Assets::register_style( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/css/admin.css' );
-        Assets::register_script( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/js/admin.js' );
-
-        $this->secret = get_option( 'oxyrealm_sandbox_secret' );
-        $this->active = $this->is_active();
-
-        add_action( 'init', [ $this, 'boot' ] );
-    }
-
-    public function boot() {
-        Assets::do_register();
-
-        if ( ! $this->active ) {
-            return;
-        }
-
-        wp_enqueue_style( "{$this->module_id}-admin" );
-        wp_enqueue_script( "{$this->module_id}-admin" );
-
-        foreach ( array_keys( wp_load_alloptions() ) as $option ) {
-            if ( strpos( $option, 'oxygen_vsb_' ) === 0 || strpos( $option, 'ct_' ) === 0 ) {
-                add_filter( "pre_option_{$option}", [ $this, 'pre_get_option' ], 0, 3 );
-                add_filter( "pre_update_option_{$option}", [ $this, 'pre_update_option' ], 0, 3 );
-            }
-        }
-
-        add_filter( 'get_post_metadata', [ $this, 'get_post_metadata' ], 0, 4 );
-        add_filter( 'update_post_metadata', [ $this, 'update_post_metadata' ], 0, 5 );
-        add_filter( 'delete_post_metadata', [ $this, 'delete_post_metadata' ], 0, 5 );
-
-        add_action( 'admin_bar_menu', [ $this, 'admin_bar_node' ], 100 );
-        add_action( 'admin_notices', [ $this, 'admin_notice_module_action' ] );
-
-        if ( isset( $_REQUEST["{$this->module_id}_publish"] ) && wp_verify_nonce( $_REQUEST["{$this->module_id}_publish"], $this->module_id ) ) {
-            $this->publish_changes();
-        } elseif ( isset( $_REQUEST["{$this->module_id}_delete"] ) && wp_verify_nonce( $_REQUEST["{$this->module_id}_delete"], $this->module_id ) ) {
-            $this->delete_changes();
-        }
     }
 
     public function pre_get_option( $pre_option, string $option, $default ) {
@@ -386,6 +372,27 @@ final class Sandbox {
         ] );
     }
 
+    public function plugin_activate(): void {
+        if ( ! get_option( 'oxyrealm_sandbox_installed' ) ) {
+            update_option( 'oxyrealm_sandbox_installed', time() );
+        }
+
+        $installed_db_version = get_option( 'oxyrealm_sandbox_db_version' );
+
+        if ( ! $installed_db_version || intval( $installed_db_version ) !== intval( OXYREALM_SANDBOX_DB_VERSION ) ) {
+            Migration::migrate( OXYREALM_SANDBOX_MIGRATION_PATH, "\\Oxyrealm\\Modules\\Sandbox\\Database\\Migrations\\", $installed_db_version ?: 0, OXYREALM_SANDBOX_DB_VERSION );
+            update_option( 'oxyrealm_sandbox_db_version', OXYREALM_SANDBOX_DB_VERSION );
+        }
+
+        update_option( 'oxyrealm_sandbox_version', OXYREALM_SANDBOX_VERSION );
+
+        self::set_secret();
+    }
+
+    public function plugin_deactivate(): void {
+        self::unset_secret();
+    }
+
     public function deactivate_module(): void {
         if ( ! function_exists( 'deactivate_plugins' ) ) {
             require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
@@ -539,4 +546,4 @@ final class Sandbox {
 
 }
 
-Sandbox::run();
+$aether_m_sandbox = Sandbox::run();
