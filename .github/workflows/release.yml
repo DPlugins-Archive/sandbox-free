@@ -18,6 +18,7 @@ jobs:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SLUG: oxyrealm-sandbox
+          ASSETS_DIR: .wordpress-org
 
       - name: Create release
         id: create_release
