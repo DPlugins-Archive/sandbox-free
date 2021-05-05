@@ -5,7 +5,7 @@
  * @wordpress-plugin
  * Plugin Name:         dPlugins Sandbox
  * Description:         Isolated environment for Oxygen Builder plugin.
- * Version:             1.0.5
+ * Version:             1.0.6
  * Author:              dPlugins
  * Author URI:          https://dplugins.com
  * Requires at least:   5.6
@@ -19,14 +19,14 @@
  * @link                https://dplugins.com
  * @since               1.0.0
  * @copyright           2021 dplugins.com
- * @version             1.0.5
+ * @version             1.0.6
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '1.0.5' );
+define( 'OXYREALM_SANDBOX_VERSION', '1.0.6' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
 
 define( 'OXYREALM_SANDBOX_FILE', __FILE__ );
@@ -297,7 +297,7 @@ final class Sandbox {
                 }
 
                 DB::update( 'options', [
-                    'option_name' => "{$this->module_id}_{$_option_name}",
+                    'option_name' => "{$_option_name}",
                 ], [
                     'option_id' => $option->option_id,
                 ] );
@@ -341,7 +341,7 @@ final class Sandbox {
                 }
 
                 DB::update( 'postmeta', [
-                    'meta_key' => "{$this->module_id}_{$_postmeta_key}",
+                    'meta_key' => "{$_postmeta_key}",
                 ], [
                     'meta_id' => $postmeta->meta_id,
                 ] );
