@@ -428,6 +428,7 @@ final class Sandbox {
                 $_postmeta_key = $this->ltrim( $postmeta->meta_key, "{$this->module_id}_{$session}_" );
 
                 $exist_postmeta = DB::get( 'postmeta', 'meta_id', [
+                    'post_id' => $postmeta->post_id,
                     'meta_key' => $_postmeta_key,
                 ] );
 
