@@ -44,6 +44,23 @@ body {
   border: 0px;
   padding: 0;
 }
+.sandbox-card input.sandbox-description{
+  padding-left: 5px;
+}
+
+.sandbox-description-wrap{
+  display: flex;
+  align-items: center;
+}
+
+.sandbox-description-wrap:before {
+  display: block;
+  content: '';
+  height: 16px;
+  width: 16px;
+  background-image: url('../img/edit.svg');
+  background-size: cover;
+}
 
 .publish-button {
   font-size: 1.2em !important;

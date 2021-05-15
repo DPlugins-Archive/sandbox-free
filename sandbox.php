@@ -269,6 +269,10 @@ final class Sandbox {
 	}
 
 	private function validate_cookie(): bool {
+		if ( isset( $_GET[ $this->module_id ] ) && isset( $_GET['session'] ) ) {
+			return false;
+		}
+
 		$cookie = isset ( $_COOKIE[ $this->module_id ] ) ? json_decode( $_COOKIE[ $this->module_id ] ) : false;
 
 		if ( $cookie ) {
@@ -292,7 +296,7 @@ final class Sandbox {
 	private function set_cookie( $data ): void {
 		setcookie( $this->module_id, json_encode( $data ), time() + DAY_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
 
-		if ( isset( $_SERVER['REQUEST_URI'] ) && wp_redirect( $_SERVER['REQUEST_URI'] ) ) {
+		if ( wp_redirect( get_home_url() ) ) {
 			exit;
 		}
 	}
@@ -300,7 +304,7 @@ final class Sandbox {
 	private function unset_cookie(): void {
 		setcookie( $this->module_id, null, - 1, COOKIEPATH, COOKIE_DOMAIN );
 
-		if ( isset( $_SERVER['REQUEST_URI'] ) && wp_redirect( $_SERVER['REQUEST_URI'] ) ) {
+		if ( wp_redirect( get_home_url() ) ) {
 			exit;
 		}
 	}

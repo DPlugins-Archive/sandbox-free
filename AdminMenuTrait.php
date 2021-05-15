@@ -44,56 +44,60 @@ trait AdminMenuTrait {
         <!-- sandbox -->
         <div class="wrap">
             <h1 class="wp-heading-inline">Oxygen Sandbox</h1>
-            <a href="https://dplugins.com" target="_blank">by dPlugins</a>
+            by <a href="https://dplugins.com" target="_blank">dPlugins</a> & <a href="https://oxyrealm.com" target="_blank">OxyRealm</a>
             <a href="<?php echo add_query_arg( [
 				'page'                           => $this->module_id,
 				"{$this->module_id}_add_session" => wp_create_nonce( $this->module_id ),
 			], admin_url( 'admin.php' ) ); ?>" class="page-title-action">Add New Session</a>
-        </div>
+			<hr class="wp-header-end">
 
-        <div class="sandbox-card" data-id="false">
-            <input type="radio" id="default" name="sandbox"
-                   value="false" <?php echo $selected_session == false ? 'checked' : ''; ?>>
-            <div class="card-content">
-                <h2><label for="default">Current Website Style</label><br></h2>
-                <div class="sandbox-description">No SandBox applied</div>
-            </div>
-        </div>
+			<div class="sandbox-card" data-id="false">
+				<input type="radio" id="default" name="sandbox"
+					value="false" <?php echo $selected_session == false ? 'checked' : ''; ?>>
+				<div class="card-content">
+					<h2><label for="default">Current Website Style</label><br></h2>
+					<div class="sandbox-description">No SandBox applied</div>
+				</div>
+			</div>
 
-		<?php foreach ( $sessions['sessions'] as $key => $value ) : ?>
-            <div class="sandbox-card" data-id="<?php echo $value['id']; ?>">
-                <input type="radio" name="sandbox" id="sandbox-<?php echo $value['id']; ?>"
-                       value="sandbox-<?php echo $value['id']; ?>" <?php echo $selected_session == $value['id'] ? 'checked' : ''; ?>>
-                <div class="card-content">
-                    <h2>
-                        <label for="sandbox-<?php echo $value['id']; ?>"><?php echo $value['name']; ?></label>
-                        <br>
-                    </h2>
-                    <input type="text" class="sandbox-description"
-                           placeholder="Click here to change the SandBox session name">
-                    <strong class="preview-link">Preview link:</strong>
-                    <div class="preview-link-form">
-                        <input type="text" onclick="this.select();" readonly value="<?php echo add_query_arg( [
-							$this->module_id => $value['secret'],
-							'session'        => $value['id'],
-						], site_url() ); ?>">
-                    </div>
-                    <div class="actions">
-                        <a class="wp-core-ui publish-button" href="<?php echo add_query_arg( [
-							'page'                       => $this->module_id,
-							"{$this->module_id}_publish" => wp_create_nonce( $this->module_id ),
-							"session"                    => $value['id'],
-						], admin_url( 'admin.php' ) ); ?>">Publish</a>
-                        <a class="delete-button" href="<?php echo add_query_arg( [
-							'page'                      => $this->module_id,
-							"{$this->module_id}_delete" => wp_create_nonce( $this->module_id ),
-							"session"                   => $value['id'],
-						], admin_url( 'admin.php' ) ); ?>">Delete</a>
-                    </div>
-                </div>
-            </div>
-		<?php endforeach; ?>
+			<?php foreach ( $sessions['sessions'] as $key => $value ) : ?>
+				<div class="sandbox-card" data-id="<?php echo $value['id']; ?>">
+					<input type="radio" name="sandbox" id="sandbox-<?php echo $value['id']; ?>"
+						value="sandbox-<?php echo $value['id']; ?>" <?php echo $selected_session == $value['id'] ? 'checked' : ''; ?>>
+					<div class="card-content">
+						<h2>
+							<label for="sandbox-<?php echo $value['id']; ?>"><?php echo $value['name']; ?></label>
+							<br>
+						</h2>
+						<div class="sandbox-description-wrap">
+							<input type="text" class="sandbox-description"
+								placeholder="Click here to change the SandBox session name">
+						</div>
+						
+						<strong class="preview-link">Preview link:</strong>
+						<div class="preview-link-form">
+							<input type="text" onclick="this.select();" readonly value="<?php echo add_query_arg( [
+								$this->module_id => $value['secret'],
+								'session'        => $value['id'],
+							], site_url() ); ?>">
+						</div>
+						<div class="actions">
+							<a class="wp-core-ui publish-button" href="<?php echo add_query_arg( [
+								'page'                       => $this->module_id,
+								"{$this->module_id}_publish" => wp_create_nonce( $this->module_id ),
+								"session"                    => $value['id'],
+							], admin_url( 'admin.php' ) ); ?>">Publish</a>
+							<a class="delete-button" href="<?php echo add_query_arg( [
+								'page'                      => $this->module_id,
+								"{$this->module_id}_delete" => wp_create_nonce( $this->module_id ),
+								"session"                   => $value['id'],
+							], admin_url( 'admin.php' ) ); ?>">Delete</a>
+						</div>
+					</div>
+				</div>
+			<?php endforeach; ?>
 
+		</div>
         <!-- sandbox -->
 
 		<?php

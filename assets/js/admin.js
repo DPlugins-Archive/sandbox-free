@@ -19,8 +19,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 let paragraph = document.createElement('p');
                 paragraph.innerHTML = msg;
                 notice.appendChild(paragraph);
-                
-                document.querySelector('div.wrap').after(notice);
+
+                document.querySelector('hr.wp-header-end').after(notice);
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -39,16 +39,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 action: `${sandbox.module_id}_update_session`,
                 session: rootNode.dataset.id
             });
-            
+
         });
 
         if (rootNode.dataset.id === 'false') {
             return;
         }
 
-        let change_name_node = rootNode.querySelector('div.card-content > input.sandbox-description');
+        let change_name_node = rootNode.querySelector('div.card-content > div.sandbox-description-wrap > input.sandbox-description');
 
-        change_name_node.addEventListener('focus', function(event) {
+        change_name_node.addEventListener('focus', function (event) {
             let title = rootNode.querySelector('div.card-content > h2 > label').textContent;
             event.target.value = title;
         });
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 try {
                     document.querySelector('#sandbox-notice').remove();
                 } catch (error) { }
-    
+
                 await do_ajax({
                     _wpnonce: sandbox.nonce,
                     action: `${sandbox.module_id}_rename_session`,
@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 rootNode.querySelector('div.card-content > h2 > label').textContent = event.target.value;
             }
-            
+
             event.target.value = '';
         });
 
