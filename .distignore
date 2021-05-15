@@ -4,3 +4,5 @@
 /node_modules
 .distignore
 .gitignore
+pnpm-lock.yaml
+composer.lock

@@ -5,7 +5,7 @@ Donate link: https://oxyrealm.com/donate?utm_source=aether
 Tags: oxygen builder, sandbox
 Requires at least: 5.6
 Tested up to: 5.7
-Stable tag: 1.0.6
+Stable tag: 2.0.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -36,6 +36,12 @@ Please [read documentation](https://dplugins.com/products/sandbox-for-oxygen-bui
 == Changelog ==
 
 For more information, see [Releases](https://dplugins.com/products/sandbox-for-oxygen-builder?utm_source=wordpressorg).
+
+= 2.0.0 =
+
+Release Date: 
+
+* New: multi sandbox sessions
 
 = 1.0.6 =
 

@@ -5,7 +5,7 @@
  * @wordpress-plugin
  * Plugin Name:         dPlugins Sandbox
  * Description:         Isolated environment for Oxygen Builder plugin.
- * Version:             1.0.6
+ * Version:             2.0.0
  * Author:              dPlugins
  * Author URI:          https://dplugins.com
  * Requires at least:   5.6
@@ -19,14 +19,14 @@
  * @link                https://dplugins.com
  * @since               1.0.0
  * @copyright           2021 dplugins.com
- * @version             1.0.6
+ * @version             2.0.0
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '1.0.6' );
+define( 'OXYREALM_SANDBOX_VERSION', '2.0.0' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
 
 define( 'OXYREALM_SANDBOX_FILE', __FILE__ );
@@ -35,30 +35,26 @@ define( 'OXYREALM_SANDBOX_MIGRATION_PATH', OXYREALM_SANDBOX_PATH . '/database/mi
 define( 'OXYREALM_SANDBOX_URL', plugins_url( '', OXYREALM_SANDBOX_FILE ) );
 define( 'OXYREALM_SANDBOX_ASSETS', OXYREALM_SANDBOX_URL . '/public' );
 
+require_once __DIR__ . '/vendor/autoload.php';
+
 use Oxyrealm\Aether\Assets;
+use Oxyrealm\Aether\Utils;
 use Oxyrealm\Aether\Utils\DB;
 use Oxyrealm\Aether\Utils\Migration;
 use WP_Admin_Bar;
 
 final class Sandbox {
 
+    use AetherTrait, AdminMenuTrait;
+
     public string $module_id = 'aether_m_sandbox';
 
     protected bool $active = false;
 
-    protected $secret;
-
-    protected $notices = [];
-
-	/**
-	 * Slug for the Aether plugin.
-	 *
-	 * @var string
-	 */
-	protected $aether_plugin_path = 'aether/aether.php';
+    protected $selected_session;
 
     public function __construct() {
-        if ( ! $this->are_requirements_met() ) {
+        if ( ! $this->are_requirements_met( OXYREALM_SANDBOX_FILE ) ) {
 			return;
 		}
 
@@ -82,26 +78,38 @@ final class Sandbox {
         Assets::register_style( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/css/admin.css' );
         Assets::register_script( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/js/admin.js' );
 
-        $this->secret = get_option( 'oxyrealm_sandbox_secret', false );
+        $this->selected_session = get_option( 'oxyrealm_sandbox_selected_session' );
 
-        if ( $this->secret === false ) {
-            $this->secret = self::set_secret();
+        if ( !$this->selected_session && !$this->get_sandbox_sessions() ) {
+            $this->selected_session = self::init_sessions();
         }
+
 
         $this->active = $this->is_active();
 
         add_action( 'init', [ $this, 'boot' ] );
     }
 
+    protected function get_sandbox_sessions(){
+        return get_option('oxyrealm_sandbox_sessions');
+    }
+
     public function boot() {
         Assets::do_register();
+
+        if ( Utils::is_request( 'ajax' ) && current_user_can( 'manage_options' ) ) {
+            add_action( "wp_ajax_{$this->module_id}_update_session", [ $this, 'ajax_update_session' ] );
+            add_action( "wp_ajax_{$this->module_id}_rename_session", [ $this, 'ajax_rename_session' ] );
+        }
+
+        add_action( 'admin_menu', [ $this, 'admin_menu' ] );
+		add_action( 'admin_notices', [ $this, 'admin_notices' ] );
+
+        $this->actions();
 
         if ( ! $this->active ) {
             return;
         }
-
-        wp_enqueue_style( "{$this->module_id}-admin" );
-        wp_enqueue_script( "{$this->module_id}-admin" );
 
         foreach ( array_keys( wp_load_alloptions() ) as $option ) {
             if ( strpos( $option, 'oxygen_vsb_' ) === 0 || strpos( $option, 'ct_' ) === 0 ) {
@@ -115,24 +123,77 @@ final class Sandbox {
         add_filter( 'delete_post_metadata', [ $this, 'delete_post_metadata' ], 0, 5 );
 
         add_action( 'admin_bar_menu', [ $this, 'admin_bar_node' ], 100 );
-        add_action( 'admin_notices', [ $this, 'admin_notice_module_action' ] );
 
-        if ( isset( $_REQUEST["{$this->module_id}_publish"] ) && wp_verify_nonce( $_REQUEST["{$this->module_id}_publish"], $this->module_id ) ) {
-            $this->publish_changes();
-        } elseif ( isset( $_REQUEST["{$this->module_id}_delete"] ) && wp_verify_nonce( $_REQUEST["{$this->module_id}_delete"], $this->module_id ) ) {
-            $this->delete_changes();
+    }
+
+    private function actions(): void {
+        if (!current_user_can( 'manage_options' )) {
+            return;
+        }
+
+        if ( 
+            isset( $_REQUEST["{$this->module_id}_add_session"] ) 
+            && wp_verify_nonce( $_REQUEST["{$this->module_id}_add_session"], $this->module_id )
+        ) {
+            $available_sessions = $this->get_sandbox_sessions();
+            $random_number = random_int(10000, 99999);
+            
+            $available_sessions['sessions'][$random_number] = [
+                'id' => $random_number,
+                'name' => "Sandbox #{$random_number}",
+                'secret' => wp_generate_uuid4(),
+            ];
+
+            update_option( 'oxyrealm_sandbox_sessions', $available_sessions );
+            wp_redirect(add_query_arg( [ 'page' => $this->module_id, ], admin_url('admin.php') ));
+            exit;
+        }
+
+        if (isset( $_REQUEST['session'] )) {
+            $session = sanitize_text_field($_REQUEST['session']);
+            $available_sessions = $this->get_sandbox_sessions();
+
+
+            if ( array_key_exists( $session, $available_sessions['sessions'] ) ) {
+                if (
+                    isset( $_REQUEST["{$this->module_id}_publish"] )
+                    && wp_verify_nonce( $_REQUEST["{$this->module_id}_publish"], $this->module_id )
+                ) {
+                    $this->publish_changes( $session );
+                    wp_redirect(add_query_arg( [ 'page' => $this->module_id, ], admin_url('admin.php') ));
+                    exit;
+                } elseif (
+                    isset( $_REQUEST["{$this->module_id}_delete"] )
+                    && wp_verify_nonce( $_REQUEST["{$this->module_id}_delete"], $this->module_id ) 
+                ) {
+                    $this->delete_changes( $session );
+                    wp_redirect(add_query_arg( [ 'page' => $this->module_id, ], admin_url('admin.php') ));
+                    exit;
+                }
+            }
         }
     }
 
     private function is_active(): bool {
+        if ( !$this->selected_session ) {
+            return false;
+        }
+
         if ( current_user_can( 'manage_options' ) || $this->validate_cookie() ) {
             return true;
         }
 
+        $session = isset( $_GET[ 'session' ] ) ? sanitize_text_field( $_GET[ 'session' ] ) : false;
         $secret = isset( $_GET[ $this->module_id ] ) ? sanitize_text_field( $_GET[ $this->module_id ] ) : false;
-        if ( $secret ) {
-            if ( $secret === $this->secret ) {
-                $this->set_cookie();
+
+        $available_sessions = $this->get_sandbox_sessions();
+
+        if ( $session && $secret ) {
+            if ( 
+                array_key_exists( $session, $available_sessions['sessions'] ) 
+                && $secret === $available_sessions['sessions'][$session]['secret']  
+            ) {
+                $this->set_cookie( ['session' => $session, 'secret' => $secret] );
             } else {
                 $this->unset_cookie();
             }
@@ -141,11 +202,56 @@ final class Sandbox {
         return false;
     }
 
+    public function ajax_update_session() {
+        wp_verify_nonce( $_REQUEST['_wpnonce'], $this->module_id );
+
+        $session = sanitize_text_field($_REQUEST['session']);
+        $available_sessions = $this->get_sandbox_sessions();
+
+        if ('false' === $session) {
+            self::unset_session();
+            wp_send_json_success('Sandbox disabled');
+        } elseif ( array_key_exists( $session, $available_sessions['sessions'] ) ) {
+            self::set_session($session);
+            wp_send_json_success('Sandbox session changed to ' . $available_sessions['sessions'][$session]['name']);
+        } else {
+            wp_send_json_error('Session not available', 422);
+        }
+        exit;
+    }
+
+    public function ajax_rename_session() {
+        wp_verify_nonce( $_REQUEST['_wpnonce'], $this->module_id );
+
+        $session = sanitize_text_field($_REQUEST['session']);
+        $new_name = sanitize_text_field($_REQUEST['new_name']);
+        $available_sessions = $this->get_sandbox_sessions();
+
+        if ( array_key_exists( $session, $available_sessions['sessions'] ) ) {
+            $old_name = $available_sessions['sessions'][$session]['name'];
+
+            $available_sessions['sessions'][$session]['name'] = $new_name;
+    
+            update_option( 'oxyrealm_sandbox_sessions', $available_sessions );
+
+            wp_send_json_success('Sandbox session renamed from '. $old_name .' to ' . $new_name);
+        } else {
+            wp_send_json_error('Session not available, could not rename', 422);
+        }
+        exit;
+    }
+
     private function validate_cookie(): bool {
-        $cookie = isset ( $_COOKIE[ $this->module_id ] ) ? sanitize_text_field( $_COOKIE[ $this->module_id ] ) : false;
+        $cookie = isset ( $_COOKIE[ $this->module_id ] ) ? json_decode( $_COOKIE[ $this->module_id ] ) : false;
 
         if ( $cookie ) {
-            if ( $cookie === $this->secret ) {
+            $available_sessions = $this->get_sandbox_sessions();
+
+            if ( 
+                array_key_exists( $cookie['session'], $available_sessions['sessions'] ) 
+                && $cookie['secret'] === $available_sessions['sessions'][$cookie['session']]['secret'] 
+            ) {
+                $this->selected_session = $available_sessions['sessions'][$cookie['session']]['id'];
                 return true;
             }
 
@@ -155,8 +261,8 @@ final class Sandbox {
         return false;
     }
 
-    private function set_cookie(): void {
-        setcookie( $this->module_id, $this->secret, time() + DAY_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
+    private function set_cookie($data): void {
+        setcookie( $this->module_id, json_encode( $data ), time() + DAY_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
 
         if ( isset( $_SERVER['REQUEST_URI'] ) && wp_redirect( $_SERVER['REQUEST_URI'] ) ) {
             exit;
@@ -171,14 +277,29 @@ final class Sandbox {
         }
     }
 
-    public static function set_secret() {
-        update_option( 'oxyrealm_sandbox_secret', wp_generate_uuid4() );
+    public static function init_sessions() {
+        $random_number = random_int(10000, 99999);
+        update_option( 'oxyrealm_sandbox_sessions', [
+            'sessions' => [
+                $random_number => [
+                    'id' => $random_number,
+                    'secret' => wp_generate_uuid4(),
+                    'name' => "Sandbox #{$random_number}"
+                ]
+            ]
+        ] );
 
-        return get_option( 'oxyrealm_sandbox_secret' );
+        self::set_session($random_number);
+
+        return get_option( 'oxyrealm_sandbox_selected_session' );
     }
 
-    public static function unset_secret(): void {
-        delete_option( 'oxyrealm_sandbox_secret' );
+    public static function set_session($session): void {
+        update_option( 'oxyrealm_sandbox_selected_session', $session );
+    }
+
+    public static function unset_session(): void {
+        update_option( 'oxyrealm_sandbox_selected_session', false );
     }
 
     public function pre_get_option( $pre_option, string $option, $default ) {
@@ -186,8 +307,8 @@ final class Sandbox {
             return 'false';
         }
 
-        if ( DB::has( 'options', [ 'option_name' => "{$this->module_id}_{$option}", ] ) ) {
-            $pre_option = get_option( "{$this->module_id}_{$option}", $default );
+        if ( DB::has( 'options', [ 'option_name' => "{$this->module_id}_{$this->selected_session}_{$option}", ] ) ) {
+            $pre_option = get_option( "{$this->module_id}_{$this->selected_session}_{$option}", $default );
         }
 
         return $pre_option;
@@ -198,26 +319,26 @@ final class Sandbox {
             return $old_value;
         }
 
-        update_option( "{$this->module_id}_{$option}", $value );
+        update_option( "{$this->module_id}_{$this->selected_session}_{$option}", $value );
 
         return $old_value;
     }
 
     public function update_post_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
         return strpos( $meta_key, 'ct_' ) === 0
-            ? update_metadata( 'post', $object_id, "{$this->module_id}_{$meta_key}", $meta_value, $prev_value )
+            ? update_metadata( 'post', $object_id, "{$this->module_id}_{$this->selected_session}_{$meta_key}", $meta_value, $prev_value )
             : $check;
     }
 
     public function delete_post_metadata( $delete, $object_id, $meta_key, $meta_value, $delete_all ) {
         return strpos( $meta_key, 'ct_' ) === 0
-            ? delete_metadata( 'post', $object_id, "{$this->module_id}_{$meta_key}", $meta_value, $delete_all )
+            ? delete_metadata( 'post', $object_id, "{$this->module_id}_{$this->selected_session}_{$meta_key}", $meta_value, $delete_all )
             : $delete;
     }
 
     public function get_post_metadata( $value, $object_id, $meta_key, $single ) {
-        if ( strpos( $meta_key, 'ct_' ) === 0 && metadata_exists( 'post', $object_id, "{$this->module_id}_{$meta_key}" ) ) {
-            $value = get_metadata( 'post', $object_id, "{$this->module_id}_{$meta_key}", $single );
+        if ( strpos( $meta_key, 'ct_' ) === 0 && metadata_exists( 'post', $object_id, "{$this->module_id}_{$this->selected_session}_{$meta_key}" ) ) {
+            $value = get_metadata( 'post', $object_id, "{$this->module_id}_{$this->selected_session}_{$meta_key}", $single );
             if ( $single && is_array( $value ) ) {
                 $value = [ $value ];
             }
@@ -232,49 +353,35 @@ final class Sandbox {
             'title' => 'Sandbox <span class="text-green-400">●</span>',
             'meta'  => [
                 'title' => 'Sandbox Mode - Aether'
-            ]
+            ],
+            'href' => add_query_arg( [ 'page' => $this->module_id, ], admin_url('admin.php') )
         ] );
     }
 
-    public function admin_notice_module_action(): void {
-        echo sprintf(
-            '<div class="notice notice-info"><p><strong> Sandbox Mode is Active	</strong><br>Any change you made to Oxygen Builder\'s settings, post, page, and template will isolated until you published it.</p><p><div><strong>Preview link</strong>: <input type="text" style="width:60%%" onclick="this.select();" readonly value="%s"></div><br><div><a id="sandbox-publish-changes" href="%s" class="button button-primary"> Publish </a> <a id="sandbox-delete-changes" href="%s" class="button button-secondary"> Delete </a></div></p></div>',
-            add_query_arg( $this->module_id, $this->secret, site_url() ),
-            add_query_arg( [ "{$this->module_id}_publish" => wp_create_nonce( $this->module_id ), ], admin_url() ),
-            add_query_arg( [ "{$this->module_id}_delete" => wp_create_nonce( $this->module_id ), ], admin_url() )
-        );
-    }
+    public function publish_changes($session): void {
+        $this->publish_sandbox_options($session);
+        $this->publish_sandbox_postmeta($session);
 
-    private function ltrim( string $string, string $prefix ): string {
-        return strpos( $string, $prefix ) === 0
-            ? substr( $string, strlen( $prefix ) )
-            : $string;
-    }
-
-    public function publish_changes(): void {
-        $this->publish_sandbox_options();
-        $this->publish_sandbox_postmeta();
-        self::set_secret();
-        $this->deactivate_module();
+        self::unset_session();
 
         if ( wp_redirect( admin_url( 'admin.php?page=oxygen_vsb_settings&tab=cache&start_cache_generation=true' ) ) ) {
             exit;
         }
     }
 
-    public function publish_sandbox_options(): void {
+    public function publish_sandbox_options($session): void {
         $options = DB::select( 'options', [
             'option_id',
             'option_name',
             'option_value',
         ], [
-            'option_name[~]' => "{$this->module_id}_%"
+            'option_name[~]' => "{$this->module_id}_{$session}_%"
         ] );
 
         if ( $options ) {
             foreach ( $options as $option ) {
                 $option       = (object) $option;
-                $_option_name = $this->ltrim( $option->option_name, "{$this->module_id}_" );
+                $_option_name = $this->ltrim( $option->option_name, "{$this->module_id}_{$session}_" );
 
                 $exist_option = DB::get( 'options', 'option_id', [
                     'option_name' => $_option_name
@@ -305,20 +412,20 @@ final class Sandbox {
         }
     }
 
-    public function publish_sandbox_postmeta(): void {
+    public function publish_sandbox_postmeta($session): void {
         $postmetas = DB::select( 'postmeta', [
             'meta_id',
             'post_id',
             'meta_key',
             'meta_value',
         ], [
-            'meta_key[~]' => "{$this->module_id}_%"
+            'meta_key[~]' => "{$this->module_id}_{$session}_%"
         ] );
 
         if ( $postmetas ) {
             foreach ( $postmetas as $postmeta ) {
                 $postmeta      = (object) $postmeta;
-                $_postmeta_key = $this->ltrim( $postmeta->meta_key, "{$this->module_id}_" );
+                $_postmeta_key = $this->ltrim( $postmeta->meta_key, "{$this->module_id}_{$session}_" );
 
                 $exist_postmeta = DB::get( 'postmeta', 'meta_id', [
                     'meta_key' => $_postmeta_key,
@@ -349,26 +456,40 @@ final class Sandbox {
         }
     }
 
-    public function delete_changes(): void {
-        $this->delete_sandbox_options();
-        $this->delete_sandbox_postmeta();
-        self::set_secret();
-        $this->deactivate_module();
+    public function delete_changes($session): void {
+        $this->delete_sandbox_options($session);
+        $this->delete_sandbox_postmeta($session);
 
-        if ( wp_redirect( admin_url( 'admin.php?page=oxygen_vsb_settings&tab=cache&start_cache_generation=true' ) ) ) {
-            exit;
+        if ($this->selected_session === $session) {
+            self::unset_session();
         }
+
+        $available_sessions = $this->get_sandbox_sessions();
+
+        $deleted_session_name = $available_sessions['sessions'][$session]['name']; 
+
+        $available_sessions['sessions'] = array_filter( $available_sessions['sessions'], function($v, $k) use ($session) {
+            
+            return $k !== (int) $session;
+        }, ARRAY_FILTER_USE_BOTH );
+
+        update_option( 'oxyrealm_sandbox_sessions', $available_sessions );
+
+        $this->notices[] = [
+            'level' => 'success',
+            'message' => "Sandbox session {$deleted_session_name} deleted"
+        ];
     }
 
-    public function delete_sandbox_options(): void {
+    public function delete_sandbox_options($session): void {
         $options = DB::delete( 'options', [
-            'option_name[~]' => "{$this->module_id}_%"
+            'option_name[~]' => "{$this->module_id}_{$session}_%"
         ] );
     }
 
-    public function delete_sandbox_postmeta(): void {
+    public function delete_sandbox_postmeta($session): void {
         $postmetas = DB::delete( 'postmeta', [
-            'meta_key[~]' => "{$this->module_id}_%"
+            'meta_key[~]' => "{$this->module_id}_{$session}_%"
         ] );
     }
 
@@ -386,163 +507,13 @@ final class Sandbox {
 
         update_option( 'oxyrealm_sandbox_version', OXYREALM_SANDBOX_VERSION );
 
-        self::set_secret();
+        if ( null === get_option( 'oxyrealm_sandbox_selected_session', null ) ) {
+            self::init_sessions();
+        }
     }
 
     public function plugin_deactivate(): void {
-        self::unset_secret();
     }
-
-    public function deactivate_module(): void {
-        if ( ! function_exists( 'deactivate_plugins' ) ) {
-            require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-        }
-
-        deactivate_plugins( plugin_basename( OXYREALM_SANDBOX_FILE ) );
-    }
-
-	public function is_aether_activated() {
-		$active_plugins = get_option( 'active_plugins', [] );
-		return in_array( $this->aether_plugin_path, $active_plugins, true );
-	}
-
-    public function is_aether_installed() {
-        if ( $this->is_aether_activated() ) {
-			return true;
-		}
-
-		if ( ! function_exists( 'get_plugins' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-		$installed_plugins = get_plugins();
-
-		return array_key_exists( $this->aether_plugin_path, $installed_plugins );
-    }
-
-	/**
-	 * Install Aether plugin from the wordpress.org repository.
-	 *
-	 * @return bool Whether install was successful.
-	 */
-	public function install_aether() {
-		include_once ABSPATH . 'wp-includes/pluggable.php';
-		include_once ABSPATH . 'wp-admin/includes/misc.php';
-		include_once ABSPATH . 'wp-admin/includes/file.php';
-		include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-		include_once ABSPATH . 'wp-admin/includes/plugin-install.php';
-		$skin        = new \Automatic_Upgrader_Skin();
-		$upgrader    = new \Plugin_Upgrader( $skin );
-		$plugin_file = 'https://downloads.wordpress.org/plugin/aether.latest-stable.zip';
-		$result      = $upgrader->install( $plugin_file );
-
-		return $result;
-	}
-
-	/**
-	 * Activate Aether plugin.
-	 *
-	 * @return bool Whether activation was successful or not.
-	 */
-	public function activate_aether() {
-		return activate_plugin( $this->aether_plugin_path );
-	}
-
-    private function are_requirements_met() {
-        if ( $this->is_aether_being_deactivated() ) {
-            $this->notices[] = [
-                'level' => 'error',
-                'message' => '<a href="https://wordpress.org/plugins/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by OxyRealm), Both plugins are now disabled.'
-            ];
-        } elseif ( $this->is_aether_being_updated() ) {
-            return false;
-        } else {
-            if ( ! $this->is_aether_installed() ) {
-                if ( ! $this->install_aether() ) {
-                    $this->notices[] = [
-                        'level' => 'error',
-                        'message' => '<a href="https://wordpress.org/plugins/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by OxyRealm), but it could not be installed automatically. Please install and activate the Aether plugin first.'
-                    ];
-                }
-            }
-
-            if ( ! $this->is_aether_activated() ) {
-                if ( ! $this->activate_aether() ) {
-                    $this->notices[] = [
-                        'level' => 'error',
-                        'message' => '<a href="https://wordpress.org/plugins/aether" target="_blank">Aether plugin</a> is required to run Sandbox (by OxyRealm), but it could not be activated automatically. Please install and activate the Aether plugin first.'
-                    ];
-                }
-            }
-        }
-
-		if ( empty( $this->notices ) ) {
-			return true;
-		}
-
-		add_action( 'admin_notices', [ $this, 'admin_notices' ] );
-        $this->deactivate_module();
-        return false;
-
-    }
-
-    public function admin_notices() {
-        foreach ($this->notices as $notice) {
-            echo sprintf(
-                '<div class="notice notice-%s is-dismissible"><p><b>Sandbox</b>: %s</p></div>',
-                $notice['level'],
-                $notice['message']
-            );
-        }
-	}
-
-    public function is_aether_being_deactivated() {
-		if ( ! is_admin() ) {
-			return false;
-		}
-
-		$action = isset( $_REQUEST['action'] ) && $_REQUEST['action'] != -1 ? $_REQUEST['action'] : '';
-		if ( ! $action ) {
-			$action = isset( $_REQUEST['action2'] ) && $_REQUEST['action2'] != -1 ? $_REQUEST['action2'] : '';
-		}
-		$plugin  = isset( $_REQUEST['plugin'] ) ? $_REQUEST['plugin'] : '';
-		$checked = isset( $_POST['checked'] ) && is_array( $_POST['checked'] ) ? $_POST['checked'] : [];
-
-		$deactivate          = 'deactivate';
-		$deactivate_selected = 'deactivate-selected';
-		$actions             = [ $deactivate, $deactivate_selected ];
-
-		if ( ! in_array( $action, $actions, true ) ) {
-			return false;
-		}
-
-		if ( $action === $deactivate && $plugin !== $this->aether_plugin_path ) {
-			return false;
-		}
-
-		if ( $action === $deactivate_selected && ! in_array( $this->aether_plugin_path, $checked, true ) ) {
-			return false;
-		}
-
-		return true;
-	}
-
-    public function is_aether_being_updated() {
-		$action = isset( $_POST['action'] ) && $_POST['action'] != -1 ? $_POST['action'] : '';
-		$plugins = isset( $_POST['plugin'] ) ? (array) $_POST['plugin'] : [];
-		if ( empty( $plugins ) ) {
-			$plugins = isset( $_POST['plugins'] ) ? (array) $_POST['plugins'] : [];
-		}
-
-		$update_plugin   = 'update-plugin';
-		$update_selected = 'update-selected';
-		$actions         = [ $update_plugin, $update_selected ];
-
-		if ( ! in_array( $action, $actions, true ) ) {
-			return false;
-		}
-
-		return in_array( $this->aether_plugin_path, $plugins, true );
-	}
 
 }
 

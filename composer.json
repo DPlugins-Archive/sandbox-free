@@ -1,0 +1,11 @@
+{
+    "name": "oxyrealm/sandbox",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Oxyrealm\\Modules\\Sandbox\\": ""
+        },
+        "classmap": [
+        ]
+    }
+}
