@@ -21,6 +21,8 @@ dPlugins Sandbox is an isolated environment for Oxygen Builder plugin.
 
 Any change you made to Oxygen Builder's settings (plugin setting and global style), post (all oxygen releated metapost) will isolated until you published it.
 
+Note: The [Aether plugin](https://wordpress.org/plugins/aether) is required to run this plugin, it will be installed automatically.
+
 ### Further Reading
 
 For more info about the fifth element for Oxygen Builder, check out the following:
