@@ -4,7 +4,7 @@ Plugin link: https://dplugins.com/products/sandbox-for-oxygen-builder?utm_source
 Donate link: https://oxyrealm.com/donate?utm_source=aether
 Tags: oxygen builder, sandbox
 Requires at least: 5.6
-Tested up to: 5.7
+Tested up to: 5.7.2
 Stable tag: 2.0.0
 Requires PHP: 7.4
 License: GPLv2 or later
