@@ -248,10 +248,10 @@ final class Sandbox {
             $available_sessions = $this->get_sandbox_sessions();
 
             if ( 
-                array_key_exists( $cookie['session'], $available_sessions['sessions'] ) 
-                && $cookie['secret'] === $available_sessions['sessions'][$cookie['session']]['secret'] 
+                array_key_exists( $cookie->session, $available_sessions['sessions'] ) 
+                && $cookie->secret === $available_sessions['sessions'][$cookie->session]['secret'] 
             ) {
-                $this->selected_session = $available_sessions['sessions'][$cookie['session']]['id'];
+                $this->selected_session = $available_sessions['sessions'][$cookie->session]['id'];
                 return true;
             }
 
