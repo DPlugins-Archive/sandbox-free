@@ -5,7 +5,7 @@ Donate link: https://oxyrealm.com/donate?utm_source=aether
 Tags: oxygen builder, sandbox
 Requires at least: 5.6
 Tested up to: 5.7.2
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -23,6 +23,8 @@ Any change you made to Oxygen Builder's settings (plugin setting and global styl
 
 Note: The [Aether plugin](https://wordpress.org/plugins/aether) is required to run this plugin, it will be installed automatically.
 
+https://www.youtube.com/watch?v=1J5dRcLstiE
+
 ### Further Reading
 
 For more info about the fifth element for Oxygen Builder, check out the following:
@@ -39,9 +41,15 @@ Please [read documentation](https://dplugins.com/products/sandbox-for-oxygen-bui
 
 For more information, see [Releases](https://dplugins.com/products/sandbox-for-oxygen-builder?utm_source=wordpressorg).
 
-= 2.0.0 =
+= 2.0.1 =
 
 Release Date: 
+
+* Improved: emphasize alert message on publish and delete session action 
+
+= 2.0.0 =
+
+Release Date: May 15th, 2021
 
 * New: multi sandbox sessions
 

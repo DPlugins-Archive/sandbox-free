@@ -5,7 +5,7 @@
  * @wordpress-plugin
  * Plugin Name:         dPlugins Sandbox
  * Description:         Isolated environment for Oxygen Builder plugin.
- * Version:             2.0.0
+ * Version:             2.0.1
  * Author:              dPlugins
  * Author URI:          https://dplugins.com
  * Requires at least:   5.6
@@ -19,14 +19,14 @@
  * @link                https://dplugins.com
  * @since               1.0.0
  * @copyright           2021 dplugins.com
- * @version             2.0.0
+ * @version             2.0.1
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '2.0.0' );
+define( 'OXYREALM_SANDBOX_VERSION', '2.0.1' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
 
 define( 'OXYREALM_SANDBOX_FILE', __FILE__ );
@@ -499,7 +499,6 @@ final class Sandbox {
 		$available_sessions = $this->get_sandbox_sessions();
 
 		$available_sessions['sessions'] = array_filter( $available_sessions['sessions'], function ( $v, $k ) use ( $session ) {
-
 			return $k !== (int) $session;
 		}, ARRAY_FILTER_USE_BOTH );
 
@@ -532,7 +531,7 @@ final class Sandbox {
 
 		update_option( 'oxyrealm_sandbox_version', OXYREALM_SANDBOX_VERSION );
 
-		if ( null === get_option( 'oxyrealm_sandbox_selected_session', null ) ) {
+		if ( ! get_option( 'oxyrealm_sandbox_selected_session' ) && ! $this->get_sandbox_sessions() ) {
 			self::init_sessions();
 		}
 	}

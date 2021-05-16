@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 let level = data.success === true ? 'success' : 'error';
                 let msg = data.data;
+
                 let notice = document.createElement('div');
                 notice.id = 'sandbox-notice';
                 notice.className = `notice is-dismissible notice-${level}`;
@@ -79,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             let title = rootNode.querySelector('div.card-content > h2 > label').textContent;
 
-            if (confirm(`DELETE the ${title} session?`)) {
+            if (confirm(`DELETE the ${title} session?\nThis action cannot be undone.\n'Cancel' to stop, 'OK' to delete.`)) {
                 window.location = event.target.href;
             }
         });
@@ -89,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             let title = rootNode.querySelector('div.card-content > h2 > label').textContent;
 
-            if (confirm(`🔥 PUBLISH the ${title} session?`)) {
+            if (confirm(`🔥 PUBLISH the ${title} session?\nThis action cannot be undone.\n'Cancel' to stop, 'OK' to publish.`)) {
                 window.location = event.target.href;
             }
         });
