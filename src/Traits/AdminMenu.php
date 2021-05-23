@@ -137,7 +137,7 @@ trait AdminMenu {
         <h3>Are all preview links accessible?</h3>
         <p>Yes, all links will work at the same time, no matter what sandbox session you choose.</p>
 
-        <h3>I enjoy and want to support OxyRealm's free plugins!</h3>
+        <h3>I enjoy and want to support dPlugins's free plugins!</h3>
         <p>Thank you, we appreciate your support. You can use this link to support and buy the coffee for the developer
             <a href="https://go.oxyrealm.com/donate">https://go.oxyrealm.com/donate</a>.</p>
 
