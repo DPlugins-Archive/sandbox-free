@@ -15,10 +15,10 @@
  * Domain Path:         /languages
  *
  * @package             Sandbox
- * @author              dPlugins <mailme@markokrstic.com>
+ * @author              oxyrealm <hello@oxyrealm.com>
  * @link                https://dplugins.com
  * @since               1.0.0
- * @copyright           2021 dplugins.com
+ * @copyright           2021 oxyrealm.com
  * @version             2.0.2
  */
 
