@@ -1,11 +1,11 @@
 <?php
 
-namespace Oxyrealm\Modules\Sandbox;
+namespace Oxyrealm\Modules\Sandbox\Traits;
 
 use Automatic_Upgrader_Skin;
 use Plugin_Upgrader;
 
-trait AetherTrait {
+trait Aether {
 
 	/**
 	 * Slug for the Aether plugin.
@@ -168,11 +168,5 @@ trait AetherTrait {
 		}
 
 		return in_array( $this->aether_plugin_path, $plugins, true );
-	}
-
-	public function ltrim( string $string, string $prefix ): string {
-		return strpos( $string, $prefix ) === 0
-			? substr( $string, strlen( $prefix ) )
-			: $string;
 	}
 }

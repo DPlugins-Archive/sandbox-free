@@ -3,7 +3,7 @@
     "require": {},
     "autoload": {
         "psr-4": {
-            "Oxyrealm\\Modules\\Sandbox\\": ""
+            "Oxyrealm\\Modules\\Sandbox\\": "src/"
         },
         "classmap": [
         ]

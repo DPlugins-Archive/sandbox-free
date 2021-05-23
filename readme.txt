@@ -1,11 +1,10 @@
 === dPlugins Sandbox - Isolated Environment for Oxygen Builder ===
 Contributors: dPlugins
-Plugin link: https://dplugins.com/products/sandbox-for-oxygen-builder?utm_source=wordpressorg
-Donate link: https://oxyrealm.com/donate?utm_source=aether
+Donate link: https://go.oxyrealm.com/donate
 Tags: oxygen builder, sandbox
 Requires at least: 5.6
 Tested up to: 5.7.2
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -29,21 +28,27 @@ https://www.youtube.com/watch?v=1J5dRcLstiE
 
 For more info about the fifth element for Oxygen Builder, check out the following:
 
-* The [dPlugins Sandbox](https://dplugins.com/products/sandbox-for-oxygen-builder?utm_source=wordpressorg) official homepage.
+* The [dPlugins Sandbox](https://go.oxyrealm.com/sandbox) official homepage.
 
 
 == Installation ==
 
-Please [read documentation](https://dplugins.com/products/sandbox-for-oxygen-builder?utm_source=wordpressorg) on dplugins Sandbox website for instruction how to install Aether plugin. 
+Please [read documentation](https://go.oxyrealm.com/documentation) on dPlugins website for instruction how to install dPlugins Sandbox plugin. 
 
 
 == Changelog ==
 
-For more information, see [Releases](https://dplugins.com/products/sandbox-for-oxygen-builder?utm_source=wordpressorg).
+For more information, see [Releases](https://go.oxyrealm.com/changelog).
+
+= 2.0.2 =
+
+Release Date: 
+
+* Improved codebase 
 
 = 2.0.1 =
 
-Release Date: 
+Release Date: May 16th, 2021
 
 * Improved: emphasize alert message on publish and delete session action 
 

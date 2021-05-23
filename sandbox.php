@@ -5,7 +5,7 @@
  * @wordpress-plugin
  * Plugin Name:         dPlugins Sandbox
  * Description:         Isolated environment for Oxygen Builder plugin.
- * Version:             2.0.1
+ * Version:             2.0.2
  * Author:              dPlugins
  * Author URI:          https://dplugins.com
  * Requires at least:   5.6
@@ -19,14 +19,14 @@
  * @link                https://dplugins.com
  * @since               1.0.0
  * @copyright           2021 dplugins.com
- * @version             2.0.1
+ * @version             2.0.2
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '2.0.1' );
+define( 'OXYREALM_SANDBOX_VERSION', '2.0.2' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
 
 define( 'OXYREALM_SANDBOX_FILE', __FILE__ );
@@ -42,6 +42,9 @@ use Oxyrealm\Aether\Utils;
 use Oxyrealm\Aether\Utils\DB;
 use Oxyrealm\Aether\Utils\Migration;
 use Oxyrealm\Aether\Utils\Notice;
+use Oxyrealm\Aether\Utils\Oxygen;
+use Oxyrealm\Modules\Sandbox\Traits\AdminMenu as AdminMenuTrait;
+use Oxyrealm\Modules\Sandbox\Traits\Aether as AetherTrait;
 use WP_Admin_Bar;
 
 final class Sandbox {
@@ -59,6 +62,10 @@ final class Sandbox {
 		if ( ! $this->are_requirements_met( OXYREALM_SANDBOX_FILE ) ) {
 			return;
 		}
+
+		add_filter( 'plugin_action_links_' . plugin_basename( OXYREALM_SANDBOX_FILE ), function ( $links ) {
+			return Utils::plugin_action_links( $links, $this->module_id );
+		} );
 
 		register_activation_hook( OXYREALM_SANDBOX_FILE, [ $this, 'plugin_activate' ] );
 		register_deactivation_hook( OXYREALM_SANDBOX_FILE, [ $this, 'plugin_deactivate' ] );
@@ -103,12 +110,16 @@ final class Sandbox {
 	public function boot() {
 		Assets::do_register();
 
-		if ( Utils::is_request( 'ajax' ) && current_user_can( 'manage_options' ) ) {
-			add_action( "wp_ajax_{$this->module_id}_update_session", [ $this, 'ajax_update_session' ] );
-			add_action( "wp_ajax_{$this->module_id}_rename_session", [ $this, 'ajax_rename_session' ] );
+		if ( Oxygen::can(true) ) {
+
+			if ( Utils::is_request( 'ajax' ) ) {
+				add_action( "wp_ajax_{$this->module_id}_update_session", [ $this, 'ajax_update_session' ] );
+				add_action( "wp_ajax_{$this->module_id}_rename_session", [ $this, 'ajax_rename_session' ] );
+			}
+
+			add_action( 'admin_menu', [ $this, 'admin_menu' ] );
 		}
 
-		add_action( 'admin_menu', [ $this, 'admin_menu' ] );
 		add_action( 'admin_notices', [ $this, 'admin_notices' ] );
 
 		$this->actions();
@@ -141,11 +152,10 @@ final class Sandbox {
 		add_filter( 'delete_post_metadata', [ $this, 'delete_post_metadata' ], 0, 5 );
 
 		add_action( 'admin_bar_menu', [ $this, 'admin_bar_node' ], 100 );
-
 	}
 
 	private function actions(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Oxygen::can(true) ) {
 			return;
 		}
 
@@ -173,7 +183,6 @@ final class Sandbox {
 		if ( isset( $_REQUEST['session'] ) ) {
 			$session            = sanitize_text_field( $_REQUEST['session'] );
 			$available_sessions = $this->get_sandbox_sessions();
-
 
 			if ( array_key_exists( $session, $available_sessions['sessions'] ) ) {
 				$session_name = $available_sessions['sessions'][ $session ]['name'];
@@ -412,7 +421,7 @@ final class Sandbox {
 		if ( $options ) {
 			foreach ( $options as $option ) {
 				$option       = (object) $option;
-				$_option_name = $this->ltrim( $option->option_name, "{$this->module_id}_{$session}_" );
+				$_option_name = Utils::ltrim( $option->option_name, "{$this->module_id}_{$session}_" );
 
 				$exist_option = DB::get( 'options', 'option_id', [
 					'option_name' => $_option_name
@@ -456,7 +465,7 @@ final class Sandbox {
 		if ( $postmetas ) {
 			foreach ( $postmetas as $postmeta ) {
 				$postmeta      = (object) $postmeta;
-				$_postmeta_key = $this->ltrim( $postmeta->meta_key, "{$this->module_id}_{$session}_" );
+				$_postmeta_key = Utils::ltrim( $postmeta->meta_key, "{$this->module_id}_{$session}_" );
 
 				$exist_postmeta = DB::get( 'postmeta', 'meta_id', [
 					'post_id'  => $postmeta->post_id,
