@@ -5,7 +5,7 @@
  * @wordpress-plugin
  * Plugin Name:         dPlugins Sandbox
  * Description:         Isolated environment for Oxygen Builder plugin.
- * Version:             2.0.2
+ * Version:             2.0.3
  * Author:              dPlugins
  * Author URI:          https://dplugins.com
  * Requires at least:   5.6
@@ -19,14 +19,14 @@
  * @link                https://dplugins.com
  * @since               1.0.0
  * @copyright           2021 oxyrealm.com
- * @version             2.0.2
+ * @version             2.0.3
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '2.0.2' );
+define( 'OXYREALM_SANDBOX_VERSION', '2.0.3' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
 
 define( 'OXYREALM_SANDBOX_FILE', __FILE__ );
@@ -56,8 +56,6 @@ final class Sandbox {
 
 	protected $selected_session;
 
-	protected $notice_lib;
-
 	public function __construct() {
 		if ( ! $this->are_requirements_met( OXYREALM_SANDBOX_FILE ) ) {
 			return;
@@ -71,8 +69,6 @@ final class Sandbox {
 		register_deactivation_hook( OXYREALM_SANDBOX_FILE, [ $this, 'plugin_deactivate' ] );
 
 		add_action( 'plugins_loaded', [ $this, 'init_plugin' ] );
-
-		$this->notice_lib = new Notice( $this->module_id, 'Sandbox' );
 	}
 
 	public static function run() {
@@ -100,7 +96,6 @@ final class Sandbox {
 		$this->active = $this->is_active();
 
 		add_action( 'init', [ $this, 'boot' ] );
-		add_action( 'admin_notices', [ $this->notice_lib, 'init' ] );
 	}
 
 	protected function get_sandbox_sessions() {
@@ -174,7 +169,7 @@ final class Sandbox {
 
 			update_option( 'oxyrealm_sandbox_sessions', $available_sessions );
 
-			$this->notice_lib->success( "New sandbox session created with id: #{$random_number}" );
+			Notice::success( "New sandbox session created with id: #{$random_number}", 'Sandbox' );
 
 			wp_redirect( add_query_arg( [ 'page' => $this->module_id, ], admin_url( 'admin.php' ) ) );
 			exit;
@@ -192,7 +187,7 @@ final class Sandbox {
 				) {
 					$this->publish_changes( $session );
 					$this->delete_changes( $session );
-					$this->notice_lib->success( "Sandbox session (name: {$session_name}) published succesfuly." );
+					Notice::success( "Sandbox session (name: {$session_name}) published succesfuly.", 'Sandbox' );
 
 					if ( wp_redirect( admin_url( 'admin.php?page=oxygen_vsb_settings&tab=cache&start_cache_generation=true' ) ) ) {
 						exit;
@@ -202,7 +197,7 @@ final class Sandbox {
 					&& wp_verify_nonce( $_REQUEST["{$this->module_id}_delete"], $this->module_id )
 				) {
 					$this->delete_changes( $session );
-					$this->notice_lib->success( "Sandbox session (name: {$session_name}) deleted succesfuly." );
+					Notice::success( "Sandbox session (name: {$session_name}) deleted succesfuly.", 'Sandbox' );
 					wp_redirect( add_query_arg( [ 'page' => $this->module_id, ], admin_url( 'admin.php' ) ) );
 					exit;
 				}
