@@ -115,8 +115,6 @@ final class Sandbox {
 			add_action( 'admin_menu', [ $this, 'admin_menu' ] );
 		}
 
-		add_action( 'admin_notices', [ $this, 'admin_notices' ] );
-
 		$this->actions();
 
 		if ( ! $this->active ) {
