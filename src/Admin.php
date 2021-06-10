@@ -1,16 +1,24 @@
 <?php
 
-namespace Oxyrealm\Modules\Sandbox\Traits;
+namespace Oxyrealm\Modules\Sandbox;
 
-use Oxyrealm\Aether\Admin;
+use Oxyrealm\Aether\Admin as AetherAdmin;
 
-trait AdminMenu {
+class Admin {
+	private $module_id;
+
+	public function __construct( $module_id ) {
+		$this->module_id = $module_id;
+
+		add_action( 'admin_menu', [ $this, 'admin_menu' ], 100 );
+	}
+
 	public function admin_menu(): void {
 		$capability = 'manage_options';
 
 		if ( current_user_can( $capability ) ) {
 			$hook = add_submenu_page(
-				Admin::$slug,
+				AetherAdmin::$slug,
 				__( 'Sandbox', 'oxyrealm-sandbox' ),
 				__( 'Sandbox', 'oxyrealm-sandbox' ),
 				$capability,
@@ -69,7 +77,8 @@ trait AdminMenu {
 	}
 
 	public function setting_tab(): void {
-		$sessions         = $this->get_sandbox_sessions();
+		global $aether_m_sandbox;
+		$sessions         = $aether_m_sandbox->get_sandbox_sessions();
 		$selected_session = get_option( 'oxyrealm_sandbox_selected_session' );
 		?>
         <!-- sandbox -->

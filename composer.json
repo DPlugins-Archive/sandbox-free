@@ -1,11 +1,20 @@
 {
     "name": "oxyrealm/sandbox",
-    "require": {},
+    "require": {
+        "oxyrealm/loader": "*"
+    },
     "autoload": {
         "psr-4": {
             "Oxyrealm\\Modules\\Sandbox\\": "src/"
         },
         "classmap": [
         ]
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/oxyrealm/loader"
+        }
+    ],
+    "minimum-stability": "dev"
 }

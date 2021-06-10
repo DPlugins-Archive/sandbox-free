@@ -5,7 +5,7 @@
  * @wordpress-plugin
  * Plugin Name:         dPlugins Sandbox
  * Description:         Isolated environment for Oxygen Builder plugin.
- * Version:             2.0.4
+ * Version:             2.0.5
  * Author:              dPlugins
  * Author URI:          https://dplugins.com
  * Requires at least:   5.6
@@ -19,15 +19,16 @@
  * @link                https://dplugins.com
  * @since               1.0.0
  * @copyright           2021 oxyrealm.com
- * @version             2.0.4
+ * @version             2.0.5
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '2.0.4' );
+define( 'OXYREALM_SANDBOX_VERSION', '2.0.5' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
+define( 'OXYREALM_SANDBOX_AETHER_MINIMUM_VERSION', '1.1.6' );
 
 define( 'OXYREALM_SANDBOX_FILE', __FILE__ );
 define( 'OXYREALM_SANDBOX_PATH', dirname( OXYREALM_SANDBOX_FILE ) );
@@ -43,21 +44,21 @@ use Oxyrealm\Aether\Utils\DB;
 use Oxyrealm\Aether\Utils\Migration;
 use Oxyrealm\Aether\Utils\Notice;
 use Oxyrealm\Aether\Utils\Oxygen;
-use Oxyrealm\Modules\Sandbox\Traits\AdminMenu as AdminMenuTrait;
-use Oxyrealm\Modules\Sandbox\Traits\Aether as AetherTrait;
+use Oxyrealm\Loader\Aether;
+use Oxyrealm\Modules\Sandbox\Admin;
+
 use WP_Admin_Bar;
 
-final class Sandbox {
-	use AetherTrait, AdminMenuTrait;
-
-	public string $module_id = 'aether_m_sandbox';
+class Sandbox extends Aether {
 
 	protected bool $active = false;
 
 	protected $selected_session;
 
-	public function __construct() {
-		if ( ! $this->are_requirements_met( OXYREALM_SANDBOX_FILE ) ) {
+	public function __construct($module_id) {
+		parent::__construct($module_id);
+		
+		if ( ! $this->are_requirements_met( OXYREALM_SANDBOX_FILE, OXYREALM_SANDBOX_AETHER_MINIMUM_VERSION ) ) {
 			return;
 		}
 
@@ -71,11 +72,11 @@ final class Sandbox {
 		add_action( 'plugins_loaded', [ $this, 'init_plugin' ] );
 	}
 
-	public static function run() {
+	public static function run($module_id) {
 		static $instance = false;
 
 		if ( ! $instance ) {
-			$instance = new Sandbox();
+			$instance = new Sandbox($module_id);
 		}
 
 		return $instance;
@@ -98,7 +99,7 @@ final class Sandbox {
 		add_action( 'init', [ $this, 'boot' ] );
 	}
 
-	protected function get_sandbox_sessions() {
+	public function get_sandbox_sessions() {
 		return get_option( 'oxyrealm_sandbox_sessions' );
 	}
 
@@ -112,7 +113,9 @@ final class Sandbox {
 				add_action( "wp_ajax_{$this->module_id}_rename_session", [ $this, 'ajax_rename_session' ] );
 			}
 
-			add_action( 'admin_menu', [ $this, 'admin_menu' ] );
+			if ( Utils::is_request( 'admin' ) ) {
+				new Admin( $this->module_id );
+			}
 		}
 
 		$this->actions();
@@ -543,4 +546,4 @@ final class Sandbox {
 
 }
 
-$aether_m_sandbox = Sandbox::run();
+$aether_m_sandbox = Sandbox::run('aether_m_sandbox');
