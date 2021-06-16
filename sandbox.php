@@ -28,7 +28,7 @@ defined( 'ABSPATH' ) || exit;
 
 define( 'OXYREALM_SANDBOX_VERSION', '2.0.5' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
-define( 'OXYREALM_SANDBOX_AETHER_MINIMUM_VERSION', '1.1.6' );
+define( 'OXYREALM_SANDBOX_AETHER_MINIMUM_VERSION', '1.1.7' );
 
 define( 'OXYREALM_SANDBOX_FILE', __FILE__ );
 define( 'OXYREALM_SANDBOX_PATH', dirname( OXYREALM_SANDBOX_FILE ) );
@@ -45,11 +45,14 @@ use Oxyrealm\Aether\Utils\Migration;
 use Oxyrealm\Aether\Utils\Notice;
 use Oxyrealm\Aether\Utils\Oxygen;
 use Oxyrealm\Loader\Aether;
+use Oxyrealm\Loader\Update;
 use Oxyrealm\Modules\Sandbox\Admin;
-
 use WP_Admin_Bar;
 
 class Sandbox extends Aether {
+
+	/** @var Update */
+	public $skynet;
 
 	protected bool $active = false;
 
@@ -118,6 +121,8 @@ class Sandbox extends Aether {
 			}
 		}
 
+		$this->plugin_update();
+
 		$this->actions();
 
 		if ( ! $this->active ) {
@@ -148,6 +153,27 @@ class Sandbox extends Aether {
 		add_filter( 'delete_post_metadata', [ $this, 'delete_post_metadata' ], 0, 5 );
 
 		add_action( 'admin_bar_menu', [ $this, 'admin_bar_node' ], 100 );
+	}
+
+	private function plugin_update(): void {
+		$payload = [
+			'version'     => OXYREALM_SANDBOX_VERSION,
+			'license'     => get_option( "{$this->module_id}_license_key" ),
+			'beta'        => get_option( "{$this->module_id}_beta" ),
+			'plugin_file' => OXYREALM_SANDBOX_FILE,
+			'item_id'     => 8654,
+			'store_url'   => 'https://dplugins.com',
+			'author'      => 'dPlugins',
+		];
+
+		$this->skynet = new Update( $this->module_id, $payload );
+
+		if ( $this->skynet->isActivated() ) {
+			$doing_cron = defined( 'DOING_CRON' ) && DOING_CRON;
+			if ( ! ( current_user_can( 'manage_options' ) && $doing_cron ) ) {
+				$this->skynet->ignite();
+			}
+		}
 	}
 
 	private function actions(): void {
