@@ -5,7 +5,7 @@
  * @wordpress-plugin
  * Plugin Name:         dPlugins Sandbox
  * Description:         Isolated environment for Oxygen Builder plugin.
- * Version:             2.0.5
+ * Version:             2.0.6
  * Author:              dPlugins
  * Author URI:          https://dplugins.com
  * Requires at least:   5.6
@@ -19,14 +19,14 @@
  * @link                https://dplugins.com
  * @since               1.0.0
  * @copyright           2021 oxyrealm.com
- * @version             2.0.5
+ * @version             2.0.6
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '2.0.5' );
+define( 'OXYREALM_SANDBOX_VERSION', '2.0.6' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
 define( 'OXYREALM_SANDBOX_AETHER_MINIMUM_VERSION', '1.1.7' );
 
