@@ -19,13 +19,13 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-suggest
 
-      # - name: WordPress Plugin SVN Deploy
-      #   uses: nk-o/action-wordpress-plugin-deploy@master
-      #   env:
-      #     SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-      #     SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-      #     SLUG: oxyrealm-sandbox
-      #     ASSETS_DIR: .wordpress-org
+      - name: WordPress Plugin SVN Deploy
+        uses: nk-o/action-wordpress-plugin-deploy@master
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: oxyrealm-sandbox
+          ASSETS_DIR: .wordpress-org
 
       - name: Clean dev files
         run: rm -rf .git* node_modules/\* pnpm-lock.yaml composer.lock .wordpress-org .distignore

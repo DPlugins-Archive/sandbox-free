@@ -20,6 +20,12 @@ dPlugins Sandbox is an isolated environment for Oxygen Builder plugin.
 
 Any change you made to Oxygen Builder's settings (plugin setting and global style), post (all oxygen releated metapost) will isolated until you published it.
 
+Features:
+* Oxygen Builder sandbox
+* Multiple sandbox session
+* Preview link for each sandbox session
+* Export & Import sandbox session <a href="https://go.oxyrealm.com/dplugins-collaboration" rel="friend">[Pro]</a>
+
 Note: The [Aether plugin](https://wordpress.org/plugins/aether) is required to run this plugin, it will be installed automatically.
 
 https://www.youtube.com/watch?v=1J5dRcLstiE
@@ -39,6 +45,13 @@ Please [read documentation](https://go.oxyrealm.com/documentation) on dPlugins w
 == Changelog ==
 
 For more information, see [Releases](https://go.oxyrealm.com/changelog).
+
+= 2.0.5 =
+
+Release Date: 
+
+* Synced with Aether plugin version 
+* Pro Sandbox plugin. Just input your Pro License, and your plugin will migrate to latest Pro version 
 
 = 2.0.4 =
 
