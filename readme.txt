@@ -24,7 +24,7 @@ Features:
 * Oxygen Builder sandbox
 * Multiple sandbox session
 * Preview link for each sandbox session
-* Export & Import sandbox session <a href="https://go.oxyrealm.com/dplugins-collaboration" rel="friend">[Pro]</a>
+* Export & Import sandbox session <a href="https://go.oxyrealm.com/sandbox" rel="friend">[Pro]</a>
 
 Note: The [Aether plugin](https://wordpress.org/plugins/aether) is required to run this plugin, it will be installed automatically.
 
