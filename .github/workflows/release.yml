@@ -31,7 +31,7 @@ jobs:
         run: rm -rf *.git* node_modules/\* pnpm-lock.yaml composer.lock .wordpress-org .distignore
 
       - name: Move files to subfolder
-        run: mkdir oxyrealm-sandbox && mv !(oxyrealm-sandbox) oxyrealm-sandbox
+        run: mkdir oxyrealm-sandbox && mv !oxyrealm-sandbox oxyrealm-sandbox
 
       - name: Create zip
         uses: montudor/action-zip@v0.1.1
