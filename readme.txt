@@ -4,7 +4,7 @@ Donate link: https://go.oxyrealm.com/donate
 Tags: oxygen builder, sandbox
 Requires at least: 5.6
 Tested up to: 5.7.2
-Stable tag: 2.0.6
+Stable tag: 2.0.7
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -21,10 +21,11 @@ dPlugins Sandbox is an isolated environment for Oxygen Builder plugin.
 Any change you made to Oxygen Builder's settings (plugin setting and global style), post (all oxygen releated metapost) will isolated until you published it.
 
 Features:
-* Oxygen Builder sandbox
+* Oxygen Builder sandbox (isolated environment)
 * Multiple sandbox session
 * Preview link for each sandbox session
 * Export & Import sandbox session <a href="https://go.oxyrealm.com/sandbox" rel="friend">[Pro]</a>
+* Reset session's token <a href="https://go.oxyrealm.com/sandbox" rel="friend">[Pro]</a>
 
 Note: The [Aether plugin](https://wordpress.org/plugins/aether) is required to run this plugin, it will be installed automatically.
 
@@ -46,16 +47,18 @@ Please [read documentation](https://go.oxyrealm.com/documentation) on dPlugins w
 
 For more information, see [Releases](https://go.oxyrealm.com/changelog).
 
-= 2.0.6 =
+= 2.0.7 =
 
-Release Date: 
+Release Date: June 19th, 2021
 
-* Synced with Aether plugin version 
-* Pro Sandbox plugin. Just input your Pro License, and your plugin will migrate to latest Pro version 
+* New: reset session's token [Pro]
+* New: Export & Import sandbox sessions [Pro]
+* New: License setting page. Just input your Pro License, and your Free plugin will migrate to latest Pro version 
+* Synced the minimum required Aether plugin version
 
 = 2.0.4 =
 
-Release Date: 
+Release Date: May 23rd, 2021
 
 * Improved codebase 
 
@@ -81,14 +84,14 @@ Release Date: May 5th, 2021
 
 Release Date: April 7th, 2021
 
-* Fixed: The secret token not generated on several installation case
+* Fixed: The token not generated on several installation case
 * Maintainer: This plugin now maintained by dPlugins developer
 
 = 1.0.3 =
 
 Release Date: March 27th, 2021
 
-* Fixed: The secret token not generated when Aether plugin is not activated
+* Fixed: The token not generated when Aether plugin is not activated
 * Improved: Now working better with Aether plugin
 
 = 1.0.0 =

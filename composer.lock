@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/oxyrealm/loader.git",
-                "reference": "51ee476a4be36b79de28a73ec1a2cebd6db41100"
+                "reference": "e51ee23748d7e62fda942b911d2461d151830747"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/oxyrealm/loader/zipball/51ee476a4be36b79de28a73ec1a2cebd6db41100",
-                "reference": "51ee476a4be36b79de28a73ec1a2cebd6db41100",
+                "url": "https://api.github.com/repos/oxyrealm/loader/zipball/e51ee23748d7e62fda942b911d2461d151830747",
+                "reference": "e51ee23748d7e62fda942b911d2461d151830747",
                 "shasum": ""
             },
             "default-branch": true,
@@ -37,7 +37,7 @@
                 "source": "https://github.com/oxyrealm/loader/tree/master",
                 "issues": "https://github.com/oxyrealm/loader/issues"
             },
-            "time": "2021-06-11T00:30:52+00:00"
+            "time": "2021-06-19T03:49:20+00:00"
         }
     ],
     "packages-dev": [],
