@@ -4,7 +4,7 @@ Donate link: https://go.oxyrealm.com/donate
 Tags: oxygen builder, sandbox
 Requires at least: 5.6
 Tested up to: 5.7.2
-Stable tag: 2.0.7
+Stable tag: 2.0.8
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -33,7 +33,7 @@ https://www.youtube.com/watch?v=1J5dRcLstiE
 
 ### Further Reading
 
-For more info about the fifth element for Oxygen Builder, check out the following:
+For more info about the Sandbox for Oxygen Builder, check out the following:
 
 * The [dPlugins Sandbox](https://go.oxyrealm.com/sandbox) official homepage.
 
@@ -46,6 +46,12 @@ Please [read documentation](https://go.oxyrealm.com/documentation) on dPlugins w
 == Changelog ==
 
 For more information, see [Releases](https://go.oxyrealm.com/changelog).
+
+= 2.0.8 =
+
+Release Date: June 26th, 2021
+
+* Updated readme.txt and FAQ page
 
 = 2.0.7 =
 

@@ -251,9 +251,48 @@ class Admin {
         <h3>Are all preview links accessible?</h3>
         <p>Yes, all links will work at the same time, no matter what sandbox session you choose.</p>
 
-        <h3>I enjoy and want to support dPlugins's free plugins!</h3>
-        <p>Thank you, we appreciate your support. You can use this link to support and buy the coffee for the developer
-            <a href="https://go.oxyrealm.com/donate">https://go.oxyrealm.com/donate</a>.</p>
+		<h3>I enjoy and want to support All our free plugins!</h3>
+		<form action="https://www.paypal.com/cgi-bin/webscr" method="post" class="donation">
+			<table class="form-table">
+				<tbody>
+				<tr>
+					<th> Plugin Support: </th>
+					<td>
+					<div>
+						<label>
+							<p>
+								Thank you, we appreciate your support. 
+								It has required a great deal of time and effort to develop and
+								you can help support this development by <strong>buy the coffee for the developer</strong>.
+							</p>
+						</label>
+
+						<input type="hidden" name="cmd" value="_xclick" />
+						<input type="hidden" name="business" value="suabahasa@gmail.com" />
+						<input type="hidden" name="item_name" value="Aether (WordPress Plugin)" />
+						<input type="hidden" name="buyer_credit_promo_code" value="" />
+						<input type="hidden" name="buyer_credit_product_category" value="" />
+						<input type="hidden" name="buyer_credit_shipping_method" value="" />
+						<input type="hidden" name="buyer_credit_user_address_change" value="" />
+						<input type="hidden" name="no_shipping" value="1" />
+						<input type="hidden" name="return" value="<?php echo add_query_arg( [ 'page' => AetherAdmin::$slug, 'tab'  => 'main', ], admin_url( 'admin.php' ) ); ?>" />
+						<input type="hidden" name="no_note" value="1" />
+						<input type="hidden" name="currency_code" value="USD" />
+						<input type="hidden" name="tax" value="0" />
+						<input type="hidden" name="lc" value="US" />
+						<input type="hidden" name="bn" value="PP-DonationsBF" />
+
+						<div class="donation-amount">
+						$ <input type="number" name="amount" min="5" value="20"> <span> 😀 </span>
+						<input type="submit" class="button-primary" value="Support 💰">
+						</div>
+					</div>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</form>
+		<style>.donation{max-width:800px}.donation .donation-amount{float:left;margin-top:10px;max-width:500px}.donation .donation-amount span{font-size:28px;margin-top:4px;vertical-align:bottom}.donation .donation-amount img{width:24px!important;margin-bottom:-5px!important}.donation .donation-amount::after{content:"";display:block;clear:both}.donation input[type=number]{width:60px;margin-left:10px}.donation td,.donation th{padding:0;margin-bottom:0}.donation input[type=submit]{margin-left:10px}</style>
 
 		<?php
 	}

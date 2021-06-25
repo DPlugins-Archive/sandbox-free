@@ -5,7 +5,7 @@
  * @wordpress-plugin
  * Plugin Name:         dPlugins Sandbox
  * Description:         Isolated environment for Oxygen Builder plugin.
- * Version:             2.0.7
+ * Version:             2.0.8
  * Author:              dPlugins
  * Author URI:          https://dplugins.com
  * Requires at least:   5.6
@@ -19,14 +19,14 @@
  * @link                https://dplugins.com
  * @since               1.0.0
  * @copyright           2021 oxyrealm.com
- * @version             2.0.7
+ * @version             2.0.8
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '2.0.7' );
+define( 'OXYREALM_SANDBOX_VERSION', '2.0.8' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
 define( 'OXYREALM_SANDBOX_AETHER_MINIMUM_VERSION', '1.1.7' );
 
@@ -46,7 +46,6 @@ use Oxyrealm\Aether\Utils\Notice;
 use Oxyrealm\Aether\Utils\Oxygen;
 use Oxyrealm\Loader\Aether;
 use Oxyrealm\Loader\Update;
-use Oxyrealm\Modules\Sandbox\Admin;
 use WP_Admin_Bar;
 
 class Sandbox extends Aether {
@@ -58,9 +57,9 @@ class Sandbox extends Aether {
 
 	protected $selected_session;
 
-	public function __construct($module_id) {
-		parent::__construct($module_id);
-		
+	public function __construct( $module_id ) {
+		parent::__construct( $module_id );
+
 		if ( ! $this->are_requirements_met( OXYREALM_SANDBOX_FILE, OXYREALM_SANDBOX_AETHER_MINIMUM_VERSION ) ) {
 			return;
 		}
@@ -75,11 +74,11 @@ class Sandbox extends Aether {
 		add_action( 'plugins_loaded', [ $this, 'init_plugin' ] );
 	}
 
-	public static function run($module_id) {
+	public static function run( $module_id ) {
 		static $instance = false;
 
 		if ( ! $instance ) {
-			$instance = new Sandbox($module_id);
+			$instance = new Sandbox( $module_id );
 		}
 
 		return $instance;
@@ -572,4 +571,4 @@ class Sandbox extends Aether {
 
 }
 
-$aether_m_sandbox = Sandbox::run('aether_m_sandbox');
+$aether_m_sandbox = Sandbox::run( 'aether_m_sandbox' );
