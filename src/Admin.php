@@ -74,7 +74,7 @@ class Admin {
 				'page' => AetherAdmin::$slug,
 				'tab'  => 'main',
 			], admin_url( 'admin.php' ) ); ?>"
-               class="nav-tab"> You Can't Open This Tab! </a>
+               class="nav-tab"> Aether </a>
         </h2>
 		<?php
 		switch ( $active_tab ) {
@@ -104,6 +104,22 @@ class Admin {
 				"{$this->module_id}_add_session" => wp_create_nonce( $this->module_id ),
 			], admin_url( 'admin.php' ) ); ?>" class="page-title-action">Add New Session</a>
 
+            <a class="page-title-action" id="import-session-btn" onClick="alert('Upgrade to Pro');">Import Session</a>
+
+            <div class="upload-plugin-wrap">
+                <div class="upload-plugin" id="upload-sandbox-session" style="display: none;">
+                    <p class="install-help">Import session by locating session file and clicking "Import session".</p>
+                    <form method="post" enctype="multipart/form-data" class="wp-upload-form"
+                          action="<?php echo add_query_arg( [
+						      'page'                      => $this->module_id,
+						      "{$this->module_id}_import" => wp_create_nonce( $this->module_id ),
+					      ], admin_url( 'admin.php' ) ); ?>">
+                        <input type="file" id="sessionfile" name="sessionfile" accept=".json" required>
+                        <input type="submit" class="button" value="Import session">
+                    </form>
+                </div>
+            </div>
+
             <div class="sandbox-card" data-id="false">
                 <input type="radio" id="default" name="sandbox"
                        value="false" <?php echo $selected_session == false ? 'checked' : ''; ?>>
@@ -114,9 +130,10 @@ class Admin {
             </div>
 
 			<?php foreach ( $sessions['sessions'] as $key => $value ) : ?>
-                <div class="sandbox-card" data-id="<?php echo $value['id']; ?>">
+                <div class="sandbox-card" style="position: relative;" data-id="<?php echo $value['id']; ?>">
                     <input type="radio" name="sandbox" id="sandbox-<?php echo $value['id']; ?>"
                            value="sandbox-<?php echo $value['id']; ?>" <?php echo $selected_session == $value['id'] ? 'checked' : ''; ?>>
+                    <span style="position: absolute;right: 5px;top: 5px;opacity: 0.7;"><b>ID:</b> <?php echo $value['id'] ?></span>
                     <div class="card-content">
                         <h2>
                             <label for="sandbox-<?php echo $value['id']; ?>"><?php echo $value['name']; ?></label>
@@ -135,16 +152,26 @@ class Admin {
 							], site_url() ); ?>">
                         </div>
                         <div class="actions">
-                            <a class="wp-core-ui publish-button" href="<?php echo add_query_arg( [
+                            <a class="wp-core-ui sandbox-button publish-button" href="<?php echo add_query_arg( [
 								'page'                       => $this->module_id,
 								"{$this->module_id}_publish" => wp_create_nonce( $this->module_id ),
 								"session"                    => $value['id'],
-							], admin_url( 'admin.php' ) ); ?>">Publish</a>
-                            <a class="delete-button" href="<?php echo add_query_arg( [
+							], admin_url( 'admin.php' ) ); ?>">
+                                <span class="dashicons dashicons-cloud-saved"></span> Publish
+                            </a>
+                            <a class="wp-core-ui sandbox-button export-button" onClick="alert('Upgrade to Pro');">
+                                <span class="dashicons dashicons-download"></span> Export
+                            </a>
+                            <a class="sandbox-button delete-button" href="<?php echo add_query_arg( [
 								'page'                      => $this->module_id,
 								"{$this->module_id}_delete" => wp_create_nonce( $this->module_id ),
 								"session"                   => $value['id'],
-							], admin_url( 'admin.php' ) ); ?>">Delete</a>
+							], admin_url( 'admin.php' ) ); ?>">
+                                <span class="dashicons dashicons-trash"></span> Delete
+                            </a>
+                            <a class="sandbox-button reset-button" onClick="alert('Upgrade to Pro');">
+                                <span class="dashicons dashicons-update-alt"></span> Reset Link
+                            </a>
                         </div>
                     </div>
                 </div>

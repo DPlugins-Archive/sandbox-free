@@ -62,11 +62,13 @@ body {
   background-size: cover;
 }
 
-.publish-button {
+.sandbox-button {
   font-size: 1.2em !important;
-  display: inline-block;
   line-height: 2.15384615;
+  display: inline-block;
   min-height: 30px;
+  text-decoration: none;
+  text-shadow: none;
   margin: 0;
   padding: 0 10px;
   cursor: pointer;
@@ -76,33 +78,46 @@ body {
   border-radius: 3px;
   white-space: nowrap;
   box-sizing: border-box;
+}
+
+.sandbox-button>.dashicons {
+  vertical-align: middle;
+}
+
+.publish-button {
   color: #2271b1;
   border-color: #2271b1;
   background: #f6f7f7;
-  text-decoration: none;
-  text-shadow: none;
+}
+
+.export-button {
+  margin-left: 20px;
+  color: #6b7278;
+  border: 1px solid #7f868d;
+  background: #f8f9fa;
+}
+
+.reset-button {
+  float: right;
+  margin-right: 20px;
+  background: white;
+  border-color: #dba617;
+  color: #dba617;
+}
+
+.reset-button:hover {
+  color: #dba617;
 }
 
 .delete-button {
-  font-size: 1.2em !important;
-  display: inline-block;
-  line-height: 2.15384615;
-  min-height: 30px;
-  margin: 0;
   float: right;
-  padding: 0 10px;
-  cursor: pointer;
-  border-width: 1px;
-  border-style: solid;
-  -webkit-appearance: none;
-  border-radius: 3px;
-  white-space: nowrap;
-  box-sizing: border-box;
   background: white;
   border-color: #b32d2e;
   color: #b32d2e;
-  text-decoration: none;
-  text-shadow: none;
+}
+
+.delete-button:hover {
+  color: #b32d2e;
 }
 
 #save-button {

@@ -5,7 +5,7 @@
  * @wordpress-plugin
  * Plugin Name:         dPlugins Sandbox
  * Description:         Isolated environment for Oxygen Builder plugin.
- * Version:             2.0.8
+ * Version:             2.0.9
  * Author:              dPlugins
  * Author URI:          https://dplugins.com
  * Requires at least:   5.6
@@ -19,14 +19,14 @@
  * @link                https://dplugins.com
  * @since               1.0.0
  * @copyright           2021 oxyrealm.com
- * @version             2.0.8
+ * @version             2.0.9
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '2.0.8' );
+define( 'OXYREALM_SANDBOX_VERSION', '2.0.9' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
 define( 'OXYREALM_SANDBOX_AETHER_MINIMUM_VERSION', '1.1.7' );
 
@@ -414,8 +414,9 @@ class Sandbox extends Aether {
 		$session_name       = $available_sessions['sessions'][ $this->selected_session ]['name'];
 
 		$wp_admin_bar->add_node( [
+			'parent' => 'top-secondary',
 			'id'    => 'oxyrealm-sandbox',
-			'title' => "Sandbox: {$session_name} <span class=\"text-green-400\">●</span>",
+			'title' => "<span style=\"font-weight:700;\">Sandbox:</span> {$session_name} <span style=\"color:limegreen;\">●</span>",
 			'meta'  => [
 				'title' => 'Sandbox Mode - Aether'
 			],
