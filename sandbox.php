@@ -155,6 +155,9 @@ class Sandbox extends Aether {
 		add_filter( 'body_class', function( $classes ) {
 			return array_merge( $classes, [ "{$this->module_id}-{$this->selected_session}" ] );
 		});
+		add_filter( 'admin_body_class', function( $classes ) {
+			return array_merge( $classes, [ "{$this->module_id}-{$this->selected_session}" ] );
+		});
 	}
 
 	private function plugin_update(): void {
