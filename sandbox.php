@@ -152,6 +152,9 @@ class Sandbox extends Aether {
 		add_filter( 'delete_post_metadata', [ $this, 'delete_post_metadata' ], 0, 5 );
 
 		add_action( 'admin_bar_menu', [ $this, 'admin_bar_node' ], 100 );
+		add_filter( 'body_class', function( $classes ) {
+			return array_merge( $classes, [ "{$this->module_id}-{$this->selected_session}" ] );
+		});
 	}
 
 	private function plugin_update(): void {
