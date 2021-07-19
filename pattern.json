@@ -1,0 +1,31 @@
+{
+    "version": "0.0.1",
+    "pattern": {
+        "oxygen_builder": {
+            "options": [
+                "oxygen_vsb_",
+                "ct_"
+            ],
+            "post_metadata": [
+                "ct_"
+            ]
+        },
+        "bricks_builder": {
+            "options": [
+                "bricks_",
+                "theme_mods_bricks"
+            ],
+            "post_metadata": [
+                "_bricks_"
+            ]
+        },
+        "brizy_builder": {
+            "options": [
+                "brizy"
+            ],
+            "post_metadata": [
+                "brizy"
+            ]
+        }
+    }
+}

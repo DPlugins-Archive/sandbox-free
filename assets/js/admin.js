@@ -96,4 +96,9 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    document.querySelector('#import-session-btn').addEventListener('click', function (event) {
+        const xstyle = document.getElementById('upload-sandbox-session');
+        xstyle.style.display = xstyle.style.display === 'none' ? 'block' : 'none';
+    });
+
 });

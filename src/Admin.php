@@ -60,21 +60,20 @@ class Admin {
 				'tab'  => 'settings',
 			], admin_url( 'admin.php' ) ); ?>"
                class="nav-tab <?php echo $active_tab == 'settings' ? 'nav-tab-active' : ''; ?>">Settings</a>
-			<a href="<?php echo add_query_arg( [
+            <a href="<?php echo add_query_arg( [
 				'page' => $this->module_id,
 				'tab'  => 'license',
 			], admin_url( 'admin.php' ) ); ?>"
                class="nav-tab <?php echo $active_tab == 'license' ? 'nav-tab-active' : ''; ?>"> License </a>
-			<a href="<?php echo add_query_arg( [
+            <a href="<?php echo add_query_arg( [
 				'page' => $this->module_id,
 				'tab'  => 'faq',
 			], admin_url( 'admin.php' ) ); ?>"
                class="nav-tab <?php echo $active_tab == 'faq' ? 'nav-tab-active' : ''; ?>">FAQ</a>
-			<a href="<?php echo add_query_arg( [
+            <a href="<?php echo add_query_arg( [
 				'page' => AetherAdmin::$slug,
 				'tab'  => 'main',
-			], admin_url( 'admin.php' ) ); ?>"
-               class="nav-tab"> Aether </a>
+			], admin_url( 'admin.php' ) ); ?>" class="nav-tab"> Aether </a>
         </h2>
 		<?php
 		switch ( $active_tab ) {
@@ -221,7 +220,6 @@ class Admin {
 						}
 					}
 				}
-
 			}
 
 			update_option( "{$this->module_id}_beta", sanitize_text_field( $_REQUEST['beta'] ?? false ) );
@@ -246,18 +244,15 @@ class Admin {
                 <tr>
                     <th scope="row"><label>License Key</label></th>
                     <td>
-                        <input name="license_key" type="text"
-                               value="<?php echo esc_attr( $_license_key ); ?>"/>
-                        <p class="description">Enter your <a
-                                    href="https://go.oxyrealm.com/sandbox"
-                                    target="_blank">license key</a> to get update</p>
+                        <input name="license_key" type="text" value="<?php echo esc_attr( $_license_key ); ?>"/>
+                        <p class="description">Enter your <a href="https://go.oxyrealm.com/sandbox" target="_blank">license
+                                key</a> to get update</p>
                     </td>
                 </tr>
                 <tr>
                     <th scope="row"><label>Enable pre-release version</label></th>
                     <td>
-                        <input name="beta" type="checkbox"
-                               value="1" <?php if ( $_beta ) {
+                        <input name="beta" type="checkbox" value="1" <?php if ( $_beta ) {
 							echo "checked";
 						} ?>>
                     </td>
@@ -278,7 +273,7 @@ class Admin {
         <h3>Are all preview links accessible?</h3>
         <p>Yes, all links will work at the same time, no matter what sandbox session you choose.</p>
 
-		<h3>I enjoy and want to support All our free plugins!</h3>
+        <h3>I enjoy and want to support All our free plugins!</h3>
 		<form action="https://www.paypal.com/cgi-bin/webscr" method="post" class="donation">
 			<table class="form-table">
 				<tbody>

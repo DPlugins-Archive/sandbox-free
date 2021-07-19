@@ -1,31 +1,37 @@
-=== dPlugins Sandbox - Isolated Environment for Oxygen Builder ===
+=== dPlugins Sandbox - Isolated Environment for WordPress Visual Builder ===
 Contributors: dPlugins
 Donate link: https://go.oxyrealm.com/donate
-Tags: oxygen builder, sandbox
+Tags: sandbox, bricks builder, oxygen builder, brizy
 Requires at least: 5.6
-Tested up to: 5.7.2
-Stable tag: 2.0.9
+Tested up to: 5.8
+Stable tag: 2.1.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-The sandbox for Oxygen Builder design development.
+The sandbox for WordPress Visual Builder.
 
 
 == Description ==
 
-### dPlugins Sandbox: Oxygen Builder isolated development.
+### dPlugins Sandbox: WordPress Visual Builder isolated development.
 
-dPlugins Sandbox is an isolated environment for Oxygen Builder plugin.
+dPlugins Sandbox is an isolated environment for WordPress Visual Builder plugin.
 
-Any change you made to Oxygen Builder's settings (plugin setting and global style), post (all oxygen releated metapost) will isolated until you published it.
+Any change you made to WordPress Visual Builder plugin's settings (plugin setting and global style), post (all WordPress Visual Builder releated metapost) will isolated until you published it.
 
-Features:
-* Oxygen Builder sandbox (isolated environment)
-* Multiple sandbox session
-* Preview link for each sandbox session
-* Export & Import sandbox session <a href="https://go.oxyrealm.com/sandbox" rel="friend">[Pro]</a>
-* Reset session's token <a href="https://go.oxyrealm.com/sandbox" rel="friend">[Pro]</a>
+### Supported WordPress Visual Builder:
+
+- [Bricks Builder](https://bricksbuilder.io/)
+- [Oxygen Builder](https://oxygenbuilder.com/)
+- [Brizy Builder](https://www.brizy.io/)
+
+### Features:
+- WordPress Visual Builder sandbox (isolated environment)
+- Multiple sandbox session
+- Preview link for each sandbox session
+- Export & Import sandbox session <a href="https://go.oxyrealm.com/sandbox" rel="friend">[Pro]</a>
+- Reset session's token <a href="https://go.oxyrealm.com/sandbox" rel="friend">[Pro]</a>
 
 Note: The [Aether plugin](https://wordpress.org/plugins/aether) is required to run this plugin, it will be installed automatically.
 
@@ -33,7 +39,7 @@ https://www.youtube.com/watch?v=1J5dRcLstiE
 
 ### Further Reading
 
-For more info about the Sandbox for Oxygen Builder, check out the following:
+For more info about the Sandbox for WordPress Visual Builder, check out the following:
 
 * The [dPlugins Sandbox](https://go.oxyrealm.com/sandbox) official homepage.
 
@@ -47,58 +53,21 @@ Please [read documentation](https://go.oxyrealm.com/documentation) on dPlugins w
 
 For more information, see [Releases](https://go.oxyrealm.com/changelog).
 
-= 2.0.9 =
+= 12.1.0 [PRO] =
 
-Release Date: June 26th, 2021
+Release Date:
 
-* Updated readme.txt and FAQ page
+* Added support for Bricks Builder (https://bricksbuilder.io/)
+* Added support for Oxygen Builder (https://oxygenbuilder.com/)
+* Added support for Brizy Builder (https://www.brizy.io/)
 
-= 2.0.7 =
+= 2.1.0 =
 
-Release Date: June 19th, 2021
+Release Date:
 
-* New: reset session's token [Pro]
-* New: Export & Import sandbox sessions [Pro]
-* New: License setting page. Just input your Pro License, and your Free plugin will migrate to latest Pro version 
-* Synced the minimum required Aether plugin version
-
-= 2.0.4 =
-
-Release Date: May 23rd, 2021
-
-* Improved codebase 
-
-= 2.0.1 =
-
-Release Date: May 16th, 2021
-
-* Improved: emphasize alert message on publish and delete session action 
-
-= 2.0.0 =
-
-Release Date: May 15th, 2021
-
-* New: multi sandbox sessions
-
-= 1.0.6 =
-
-Release Date: May 5th, 2021
-
-* Fixed: wrong published option and post meta name
-
-= 1.0.5 =
-
-Release Date: April 7th, 2021
-
-* Fixed: The token not generated on several installation case
-* Maintainer: This plugin now maintained by dPlugins developer
-
-= 1.0.3 =
-
-Release Date: March 27th, 2021
-
-* Fixed: The token not generated when Aether plugin is not activated
-* Improved: Now working better with Aether plugin
+* Added support for Bricks Builder (https://bricksbuilder.io/)
+* Added support for Oxygen Builder (https://oxygenbuilder.com/)
+* Added support for Brizy Builder (https://www.brizy.io/)
 
 = 1.0.0 =
 

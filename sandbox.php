@@ -1,15 +1,16 @@
 <?php
+
 /**
- * dPlugins Sandbox - Isolated Environment for Oxygen Builder
+ * dPlugins Sandbox - Isolated Environment for WordPress Visual Builder
  *
  * @wordpress-plugin
  * Plugin Name:         dPlugins Sandbox
- * Description:         Isolated environment for Oxygen Builder plugin.
- * Version:             2.0.9
+ * Description:         Isolated Environment for WordPress Visual Builder.
+ * Version:             2.1.0
  * Author:              dPlugins
  * Author URI:          https://dplugins.com
  * Requires at least:   5.6
- * Tested up to:        5.7.2
+ * Tested up to:        5.8
  * Requires PHP:        7.4
  * Text Domain:         oxyrealm-sandbox
  * Domain Path:         /languages
@@ -19,16 +20,16 @@
  * @link                https://dplugins.com
  * @since               1.0.0
  * @copyright           2021 oxyrealm.com
- * @version             2.0.9
+ * @version             2.1.0
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '2.0.9' );
+define( 'OXYREALM_SANDBOX_VERSION', '2.1.0' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
-define( 'OXYREALM_SANDBOX_AETHER_MINIMUM_VERSION', '1.1.7' );
+define( 'OXYREALM_SANDBOX_AETHER_MINIMUM_VERSION', '1.1.14' );
 
 define( 'OXYREALM_SANDBOX_FILE', __FILE__ );
 define( 'OXYREALM_SANDBOX_PATH', dirname( OXYREALM_SANDBOX_FILE ) );
@@ -38,6 +39,7 @@ define( 'OXYREALM_SANDBOX_ASSETS', OXYREALM_SANDBOX_URL . '/public' );
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+use Composer\Semver\Comparator;
 use Oxyrealm\Aether\Assets;
 use Oxyrealm\Aether\Utils;
 use Oxyrealm\Aether\Utils\DB;
@@ -47,6 +49,8 @@ use Oxyrealm\Aether\Utils\Oxygen;
 use Oxyrealm\Loader\Aether;
 use Oxyrealm\Loader\Update;
 use WP_Admin_Bar;
+use WP_Error;
+use function unlink;
 
 class Sandbox extends Aether {
 
@@ -56,6 +60,8 @@ class Sandbox extends Aether {
 	protected bool $active = false;
 
 	protected $selected_session;
+
+	protected $pattern = null;
 
 	public function __construct( $module_id ) {
 		parent::__construct( $module_id );
@@ -89,6 +95,8 @@ class Sandbox extends Aether {
 		Assets::register_script( "{$this->module_id}-admin", OXYREALM_SANDBOX_URL . '/assets/js/admin.js' );
 		Assets::register_style( "{$this->module_id}-oygen-editor", OXYREALM_SANDBOX_URL . '/assets/css/oxygen-editor.css' );
 		Assets::register_script( "{$this->module_id}-oygen-editor", OXYREALM_SANDBOX_URL . '/assets/js/oxygen-editor.js' );
+
+		$this->pattern = $this->get_pattern();
 
 		$this->selected_session = get_option( 'oxyrealm_sandbox_selected_session' );
 
@@ -141,7 +149,7 @@ class Sandbox extends Aether {
 		}
 
 		foreach ( array_keys( wp_load_alloptions() ) as $option ) {
-			if ( strpos( $option, 'oxygen_vsb_' ) === 0 || strpos( $option, 'ct_' ) === 0 ) {
+			if ( $this->match_pattern('options', $option) ) {
 				add_filter( "pre_option_{$option}", [ $this, 'pre_get_option' ], 0, 3 );
 				add_filter( "pre_update_option_{$option}", [ $this, 'pre_update_option' ], 0, 3 );
 			}
@@ -162,13 +170,14 @@ class Sandbox extends Aether {
 
 	private function plugin_update(): void {
 		$payload = [
-			'version'     => OXYREALM_SANDBOX_VERSION,
-			'license'     => get_option( "{$this->module_id}_license_key" ),
-			'beta'        => get_option( "{$this->module_id}_beta" ),
-			'plugin_file' => OXYREALM_SANDBOX_FILE,
-			'item_id'     => 8654,
-			'store_url'   => 'https://dplugins.com',
-			'author'      => 'dPlugins',
+			'version'            => OXYREALM_SANDBOX_VERSION,
+			'license'            => get_option( "{$this->module_id}_license_key" ),
+			'beta'               => get_option( "{$this->module_id}_beta" ),
+			'plugin_file'        => OXYREALM_SANDBOX_FILE,
+			'item_id'            => 8654,
+			'store_url'          => 'https://dplugins.com',
+			'author'             => 'dPlugins',
+			'is_require_license' => false,
 		];
 
 		$this->skynet = new Update( $this->module_id, $payload );
@@ -309,7 +318,7 @@ class Sandbox extends Aether {
 			return false;
 		}
 
-		$cookie = isset ( $_COOKIE[ $this->module_id ] ) ? json_decode( $_COOKIE[ $this->module_id ] ) : false;
+		$cookie = isset( $_COOKIE[ $this->module_id ] ) ? json_decode( $_COOKIE[ $this->module_id ] ) : false;
 
 		if ( $cookie ) {
 			$available_sessions = $this->get_sandbox_sessions();
@@ -393,19 +402,19 @@ class Sandbox extends Aether {
 	}
 
 	public function update_post_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
-		return strpos( $meta_key, 'ct_' ) === 0
+		return $this->match_pattern('post_metadata', $meta_key)
 			? update_metadata( 'post', $object_id, "{$this->module_id}_{$this->selected_session}_{$meta_key}", $meta_value, $prev_value )
 			: $check;
 	}
 
 	public function delete_post_metadata( $delete, $object_id, $meta_key, $meta_value, $delete_all ) {
-		return strpos( $meta_key, 'ct_' ) === 0
+		return $this->match_pattern('post_metadata', $meta_key)
 			? delete_metadata( 'post', $object_id, "{$this->module_id}_{$this->selected_session}_{$meta_key}", $meta_value, $delete_all )
 			: $delete;
 	}
 
 	public function get_post_metadata( $value, $object_id, $meta_key, $single ) {
-		if ( strpos( $meta_key, 'ct_' ) === 0 && metadata_exists( 'post', $object_id, "{$this->module_id}_{$this->selected_session}_{$meta_key}" ) ) {
+		if ( $this->match_pattern('post_metadata', $meta_key) && metadata_exists( 'post', $object_id, "{$this->module_id}_{$this->selected_session}_{$meta_key}" ) ) {
 			$value = get_metadata( 'post', $object_id, "{$this->module_id}_{$this->selected_session}_{$meta_key}", $single );
 			if ( $single && is_array( $value ) ) {
 				$value = [ $value ];
@@ -576,6 +585,50 @@ class Sandbox extends Aether {
 	public function plugin_deactivate(): void {
 	}
 
+	public static function get_filesystem() {
+		global $wp_filesystem;
+
+		if ( ! defined( 'FS_METHOD' ) ) {
+			define( 'FS_METHOD', 'direct' );
+		}
+
+		if ( empty( $wp_filesystem ) ) {
+			require_once ABSPATH . '/wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+
+		return $wp_filesystem;
+	}
+
+
+	public function match_pattern($type, $str) {
+		foreach ($this->pattern[$type] as $pattern) {
+			if (strpos( $str, $pattern ) === 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public function get_pattern(){
+		$file = plugin_dir_path( OXYREALM_SANDBOX_FILE ) . 'pattern.json';
+
+		$wp_filesystem = $this->get_filesystem();
+		$data       = $wp_filesystem->get_contents( $file );
+		$pattern_definition = json_decode($data, true);
+
+		$pattern = [
+			'options' => [],
+			'post_metadata' => [],
+		];
+
+		foreach ($pattern_definition['pattern'] as $vendor) {
+			$pattern['options'] = array_merge($pattern['options'], $vendor['options']);
+			$pattern['post_metadata'] = array_merge($pattern['post_metadata'], $vendor['post_metadata']);
+		}
+
+		return $pattern;
+	}
 }
 
 $aether_m_sandbox = Sandbox::run( 'aether_m_sandbox' );

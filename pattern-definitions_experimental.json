@@ -1,0 +1,57 @@
+{
+    "version": "0.0.1",
+    "pattern": {
+        "oxygen_builder": {
+            "options": [
+                "oxygen_vsb_",
+                "ct_"
+            ],
+            "post_metadata": [
+                "ct_"
+            ]
+        },
+        "elementor": {
+            "options": [
+                "elementor_",
+                "_elementor_"
+            ],
+            "post_metadata": [
+                "_elementor_"
+            ]
+        },
+        "beaver_builder": {
+            "options": [
+                "fl_builder_",
+                "_fl_builder_"
+            ],
+            "post_metadata": [
+                "_fl_builder_"
+            ]
+        },
+        "bricks_builder": {
+            "options": [
+                "bricks_",
+                "theme_mods_bricks"
+            ],
+            "post_metadata": [
+                "_bricks_"
+            ]
+        },
+        "site_origin": {
+            "options": [
+                "siteorigin_",
+                "widget_siteorigin"
+            ],
+            "post_metadata": [
+            ]
+        },
+        "brizy_builder": {
+            "options": [
+                "brizy"
+            ],
+            "post_metadata": [
+                "brizy"
+            ]
+        }
+    }
+}
