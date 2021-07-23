@@ -26,6 +26,16 @@
             "post_metadata": [
                 "brizy"
             ]
+        },
+        "zion_builder": {
+            "options": [
+                "zionbuilder_",
+                "_zionbuilder_"
+            ],
+            "post_metadata": [
+                "zionbuilder_",
+                "_zionbuilder_"
+            ]
         }
     }
 }

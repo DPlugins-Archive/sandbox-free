@@ -6,7 +6,7 @@
  * @wordpress-plugin
  * Plugin Name:         dPlugins Sandbox
  * Description:         Isolated Environment for WordPress Visual Builder.
- * Version:             2.1.0
+ * Version:             2.1.1
  * Author:              dPlugins
  * Author URI:          https://dplugins.com
  * Requires at least:   5.6
@@ -20,14 +20,14 @@
  * @link                https://dplugins.com
  * @since               1.0.0
  * @copyright           2021 oxyrealm.com
- * @version             2.1.0
+ * @version             2.1.1
  */
 
 namespace Oxyrealm\Modules\Sandbox;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'OXYREALM_SANDBOX_VERSION', '2.1.0' );
+define( 'OXYREALM_SANDBOX_VERSION', '2.1.1' );
 define( 'OXYREALM_SANDBOX_DB_VERSION', '001' );
 define( 'OXYREALM_SANDBOX_AETHER_MINIMUM_VERSION', '1.1.14' );
 

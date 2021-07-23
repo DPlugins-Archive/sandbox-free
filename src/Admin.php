@@ -52,7 +52,7 @@ class Admin {
 	public function plugin_page(): void {
 		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'settings';
 		?>
-        <h2>Oxygen Builder Sandbox by dPlugins Settings</h2>
+        <h2>dPlugins Sandbox Settings</h2>
         <hr class="wp-header-end">
         <h2 class="nav-tab-wrapper">
             <a href="<?php echo add_query_arg( [

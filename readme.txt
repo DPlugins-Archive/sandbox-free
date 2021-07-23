@@ -4,7 +4,7 @@ Donate link: https://go.oxyrealm.com/donate
 Tags: sandbox, bricks builder, oxygen builder, brizy
 Requires at least: 5.6
 Tested up to: 5.8
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -22,9 +22,10 @@ Any change you made to WordPress Visual Builder plugin's settings (plugin settin
 
 ### Supported WordPress Visual Builder:
 
-- [Bricks Builder](https://bricksbuilder.io/)
 - [Oxygen Builder](https://oxygenbuilder.com/)
+- [Bricks Builder](https://bricksbuilder.io/)
 - [Brizy Builder](https://www.brizy.io/)
+- [Zion Builder](https://zionbuilder.io/)
 
 ### Features:
 - WordPress Visual Builder sandbox (isolated environment)
@@ -52,6 +53,18 @@ Please [read documentation](https://go.oxyrealm.com/documentation) on dPlugins w
 == Changelog ==
 
 For more information, see [Releases](https://go.oxyrealm.com/changelog).
+
+= 12.1.1 [PRO] =
+
+Release Date:
+
+* Added support for Zion Builder (https://zionbuilder.io/)
+
+= 2.1.1 =
+
+Release Date:
+
+* Added support for Zion Builder (https://zionbuilder.io/)
 
 = 12.1.0 [PRO] =
 
